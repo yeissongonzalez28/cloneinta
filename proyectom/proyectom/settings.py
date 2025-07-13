@@ -38,8 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'prodesarrollo',  # Your custom app
+    'prodesarrollo',
 ]
 
 MIDDLEWARE = [
@@ -75,10 +74,16 @@ WSGI_APPLICATION = 'proyectom.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+AUTH_USER_MODEL = 'prodesarrollo.Usuario'
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',  # Cambia a 'django.db.backends.sqlite3' si prefieres SQLite
+        'NAME': 'clonein',  # Nombre de tu base de datos
+        'USER': 'root',
+        'PASSWORD': 'yeisson2808',  # Contraseña de tu base de datos, si es necesario
+        'HOST': 'localhost',  # Cambia esto si tu base de datos está en otro host
+        'PORT': '3306',  # Cambia esto si tu base de datos usa
     }
 }
 

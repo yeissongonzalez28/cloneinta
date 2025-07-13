@@ -27,27 +27,42 @@
                     <div class="flex justify-center mb-8">
                         <span class="logo-font text-5xl text-white">Instapp</span>
                     </div>
-                    <form method="post" class="flex flex-col gap-2">
+                    {% if error %}
+                        <div class="text-red-500 text-center mb-2">{{ error }}</div>
+                    {% endif %}
+                    {% if success %}
+                        <div class="text-green-500 text-center mb-2">{{ success }}</div>
+                    {% endif %}
+                    <form method="post" enctype="multipart/form-data" class="flex flex-col gap-2">
                         {% csrf_token %}
-                        <div class="text-neutral-400 text-sm font-semibold mb-2 text-center">Regístrate para ver fotos y videos de tus amigos.
-                        </div>
-                        <input type="text" name="username" placeholder="Numero de celular o correo electrónico"
-                            class="bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-400 focus:outline-none" required>
-                        <input type="password" name="password" placeholder="Contraseña"
-                            class="bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-400 focus:outline-none" required>
-                        <input type="text" name="username" placeholder="Nombre completo"
-                            class="bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-400 focus:outline-none" required>
-                        <input type="text" name="username" placeholder="Nombre de usuario"
-                            class="bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-400 focus:outline-none" required>
-                        <div class="text-center text-[10px] text-neutral-300 px-3 py-2">Es posible que las personas que usan nuestro servicio hayan subido tu información de contacto a Instagram.
-                            <a href="https://www.facebook.com/help/instagram/261704639352628" class="text-[#0095f6] font-semibold"> Más información</a><br> Al registrarte, aceptas nuestras
-                            <a href="https://help.instagram.com/581066165581870/?locale=es_LA" class="text-[#0095f6] font-semibold">Condiciones</a>, la
-                            <a href="https://www.facebook.com/privacy/policy" class="text-[#0095f6] font-semibold">Política de privacidad </a> y la
-                            <a href="https://help.instagram.com/581066165581870/?locale=es_LA" class="text-[#0095f6] font-semibold">Política de cookies</a>.
-                        </div>
 
-                            <a href="{% url 'index' %}" class="mt-2 bg-[#0095f6] hover:bg-[#1877f2] text-white font-semibold rounded py-2 transition-color text-center">Registrarte</a>
+                        <!-- Renderiza cada campo del formulario con Tailwind -->
+                        {% for field in form %}
+                            <div>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ field.errors|striptags }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <p class="text-xs text-gray-500 text-center">
+                            Es posible que las personas que usan nuestro servicio hayan subido tu información de contacto a Instagram.
+                            <a href="https://www.facebook.com/help/instagram/261704639352628" class="text-[#0095f6] font-semibold">Más información</a>
+                        </p>
+
+                        <p class="text-xs text-gray-500 text-center">
+                            Al registrarte, aceptas nuestras
+                            <a href="https://help.instagram.com/581066165581870/?locale=es_LA" class="text-[#0095f6] font-semibold">Condiciones</a>, la
+                            <a href="https://www.facebook.com/privacy/policy" class="text-[#0095f6] font-semibold">Política de privacidad</a> y la
+                            <a href="https://help.instagram.com/581066165581870/?locale=es_LA" class="text-[#0095f6] font-semibold">Política de cookies</a>.
+                        </p>
+
+                        <button type="submit" class="w-full bg-[#0095f6] hover:bg-[#1877f2] text-white font-semibold rounded py-2 transition-colors">
+                            Registrarte
+                        </button>
                     </form>
+
                     <div class="flex items-center my-4">
                         <div class="flex-1 h-px bg-neutral-700"></div>
                         <span class="mx-4 text-neutral-400 text-sm font-semibold">o</span>
@@ -70,7 +85,6 @@
             </div>
         </div>
     </div>
-
     <script src="{% static 'myapp/js/inicio.js' %}"></script>
 </body>
 </html>
