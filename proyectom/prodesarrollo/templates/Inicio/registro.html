@@ -12,31 +12,24 @@
 <body>
     <div class="min-h-screen flex items-center justify-center bg-black">
         <div class="flex flex-col md:flex-row items-center justify-center gap-12">
-            <!-- Mockup de móviles -->
-            <div class="hidden md:block">
-            <div id="image-container" class="relative w-[400px] h-[580px]">
-                <img id="img1" src="{% static 'myapp/img/instagram.jpg' %}" class="absolute w-full h-full object-cover opacity-100 transition-opacity duration-1000 rounded-lg"> ">
-                <img id="img2" src="{% static 'myapp/img/selfie.jpg' %}" class="absolute w-full h-full object-cover opacity-0 transition-opacity duration-1000 rounded-lg">
-                <img id="img3" src="{% static 'myapp/img/smartphone.jpg' %}" class="absolute w-full h-full object-cover opacity-0 transition-opacity duration-1000 rounded-lg">
-                <img id="img4" src="{% static 'myapp/img/selfie2.jpg' %}" class="absolute w-full h-full object-cover opacity-0 transition-opacity duration-1000 rounded-lg">
+            <div class="hidden md:flex items-center space-x-4 relative ml-[-200px]">
+                <img id='mano'src="{% static 'myapp/img/manito.png' %}" class="w-full h-full rounded-lg z-0 absolute top-0 left-11">
+                <div id="image-container" class="relative z-10 w-[700px] h-[760px]">
+                    <img id="img1" src="{% static 'myapp/img/instagram.jpg' %}" class="absolute w-[300px] h-[645px] object-cover opacity-100 transition-opacity duration-1000 rounded-[50px] left-[45%] top-[65px]">
+                    <img id="img2" src="{% static 'myapp/img/selfie.jpg' %}" class="absolute w-[300px] h-[645px] object-cover opacity-0 transition-opacity duration-1000 rounded-[50px] left-[45%] top-[60px]">
+                    <img id="img3" src="{% static 'myapp/img/smartphone.jpg' %}" class="absolute w-[301px] h-[645px] object-cover opacity-0 transition-opacity duration-1000 rounded-[50px] left-[45%] top-[60px]">
+                    <img id="img4" src="{% static 'myapp/img/selfie2.jpg' %}" class="absolute w-[300px] h-[645px] object-cover opacity-0 transition-opacity duration-1000 rounded-[50px] left-[45%] top-[60px]">
+                </div>
             </div>
-            </div>
+
             <!-- Formulario de inicio de sesión -->
             <div>
                 <div class="bg-black border border-neutral-700 px-10 py-8 rounded-md w-[350px]">
                     <div class="flex justify-center mb-8">
                         <span class="logo-font text-5xl text-white">Instapp</span>
                     </div>
-                    {% if error %}
-                        <div class="text-red-500 text-center mb-2">{{ error }}</div>
-                    {% endif %}
-                    {% if success %}
-                        <div class="text-green-500 text-center mb-2">{{ success }}</div>
-                    {% endif %}
-                    <form method="post" enctype="multipart/form-data" class="flex flex-col gap-2">
+                    <form method="post" class="flex flex-col gap-2">
                         {% csrf_token %}
-
-                        <!-- Renderiza cada campo del formulario con Tailwind -->
                         {% for field in form %}
                             <div>
                                 {{ field }}
@@ -75,10 +68,10 @@
                             </svg>
                             Iniciar sesión con Facebook
                         </a>
-                        <a href="#" class="text-[#b3b3b3] text-sm font-medium mt-2">¿Olvidaste tu contraseña?</a>
+                        <a href="#" class="text-white text-sm font-medium mt-2 hover:text-[#b3b3b3]">¿Olvidaste tu contraseña?</a>
                     </div>
                 </div>
-                <div class="bg-black border border-neutral-700 mt-4 py-6 px-10 rounded-md text-center text-neutral-300 text-sm">
+                <div class="bg-black border border-neutral-700 mt-4 py-6 px-10 rounded-md text-center text-white text-sm">
                     ¿Tienes una cuenta?
                     <a href="{% url 'index' %}" class="text-[#0095f6] font-semibold"><br>Inicia sesión</a>
                 </div>

@@ -3,6 +3,8 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 import re
 from .models import Usuario
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
 
 class RegistroForm(forms.ModelForm):
     email_or_phone = forms.CharField(
@@ -11,6 +13,7 @@ class RegistroForm(forms.ModelForm):
             'class': 'bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-400 focus:outline-none w-full'}),
         max_length=100
     )
+
     username = forms.CharField(
     label="Nombre de usuario",
     widget=forms.TextInput(attrs={
@@ -44,8 +47,15 @@ class RegistroForm(forms.ModelForm):
     )
     class Meta:
         model = Usuario
-        fields = ['username', 'nombre_completo', 'email_or_phone', 'password']  # email_or_phone reemplaza email y teléfono
+        fields = ['username', 'nombre_completo', 'email_or_phone', 'password']
 
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        # Estas dos líneas deben estar indentadas con 4 espacios (o 1 tabulación)
+        if Usuario.objects.filter(username=username).exists():
+            raise ValidationError("Este nombre de usuario ya existe.")
+        return username
+    
     def clean_email_or_phone(self):
         value = self.cleaned_data['email_or_phone']
 
@@ -77,6 +87,32 @@ class RegistroForm(forms.ModelForm):
         user.set_password(self.cleaned_data['password'])
         user.email = self.cleaned_data.get('email', None)
         user.telefono = self.cleaned_data.get('telefono', None)
+
+        if user.email:
+            codigo = get_random_string(length=6, allowed_chars='1234567890')
+            user.codigo_verificacion = codigo
+            user.email_verificado = False  # Aún no está verificado
+
+            # Envía el correo
+            send_mail(
+                'Código de verificación',
+                f'Tu código de verificación es: {codigo}',
+                'noreply@tuapp.com',  # Remitente
+                [user.email],         # Destinatario
+                fail_silently=False,
+            )
         if commit:
             user.save()
         return user
+
+class LoginForm(forms.Form):
+    identificador = forms.CharField(
+        label="Correo, teléfono o usuario",
+        widget=forms.TextInput(attrs={'placeholder': 'Correo, teléfono o usuario',
+            'class': 'bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-400 focus:outline-none w-full'})
+    )
+    password = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={'placeholder': 'Contraseña',
+            'class': 'bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-400 focus:outline-none w-full'})
+    )

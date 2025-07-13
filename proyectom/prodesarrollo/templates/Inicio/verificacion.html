@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Verificar correo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black flex items-center justify-center min-h-screen">
+    <div class="flex flex-col md:flex-row items-center justify-center space-x-0 md:space-x-10">
+
+        <!-- Contenedor del formulario -->
+        <div class="bg-black border border-gray-700 p-8 rounded-lg w-full max-w-md text-white">
+            <h1 class="text-3xl font-bold text-center mb-4">Instapp</h1>
+            <p class="text-sm text-center text-gray-400 mb-6">Hemos enviado un código de verificación a tu correo electrónico.</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="text-center text-sm text-red-500 mb-2">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <input
+                    type="text"
+                    name="codigo"
+                    placeholder="Código de verificación"
+                    class="w-full px-3 py-2 mb-4 bg-black border border-gray-500 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                >
+
+                <button
+                    type="submit"
+                    class="w-full bg-[#0095f6] hover:bg-[#1877f2] text-white font-semibold py-2 rounded transition duration-200"
+                >
+                    Verificar
+                </button>
+            </form>
+
+            <p class="text-center text-xs text-gray-400 mt-6">
+                ¿No recibiste el código? <a href="{% url 'reenviar_codigo' %}" class="text-[#0095f6] hover:underline">Reenviar</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
