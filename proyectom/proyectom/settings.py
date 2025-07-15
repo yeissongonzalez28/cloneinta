@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'prodesarrollo',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -68,6 +69,16 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = 'proyectom.asgi.application'
+ASGI_APPLICATION = 'proyectom.routing.application'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+    },
+}
 WSGI_APPLICATION = 'proyectom.wsgi.application'
 
 
@@ -93,7 +104,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'gonzalezsochayeissonfrancisco@gmail.com'
 EMAIL_HOST_PASSWORD = 'gsil iopr lykh qshg'  # Usa contraseña de aplicación si es Gmail
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -134,6 +144,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'prodesarrollo/static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # <-- Agrega esta línea
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 # Default primary key field type

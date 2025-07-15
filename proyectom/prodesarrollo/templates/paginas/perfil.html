@@ -60,99 +60,56 @@
             </a>
 
             <a href="{% url 'perfil' user.username %}" class="flex items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800">
-                <img src="https://via.placeholder.com/24" alt="Perfil" class="w-6 h-6 rounded-full">
+                <img src="{{ sugerencia.usuario.profile.avatar.url|default:'/media/perfiles/perfil_default.jpg' }}" alt="Perfil" class="w-6 h-6 rounded-full">
                 <span>Perfil</span>
             </a>
         </nav>
+        
+    <div class="max-w-4xl mx-auto p-6">
+        <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+            <!-- Foto de perfil -->
+            <div class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-gray-300">
+                <img src="{{ sugerencia.usuario.profile.avatar.url|default:'/media/perfiles/perfil_default.jpg' }}" alt="Foto de perfil" class="w-full h-full object-cover">
+            </div>
 
-        <!-- Contenido principal -->
-        <main class="ml-[244px] flex-1 p-8">
-            <!-- Stories -->
-            <div class="flex gap-4 mb-8 overflow-x-auto">
-                <!-- Repetir para cada historia -->
-                <div class="flex flex-col items-center">
-                    <div class="story-ring p-[2px] rounded-full">
-                        <div class="bg-black p-[2px] rounded-full">
-                            <img src="https://via.placeholder.com/56" alt="Historia" class="w-14 h-14 rounded-full">
-                        </div>
-                    </div>
-                    <span class="text-xs mt-1">usuario1</span>
+            <!-- Información del usuario -->
+            <div class="flex-1 space-y-4">
+            <div class="flex flex-col md:flex-row items-center gap-4">
+                <h1 class="text-2xl font-light lowercase">{{ user.username }}</h1>
+                <div class="flex gap-2">
+                <a href="{% url 'editar_perfil' %}" class="bg-gray-500 px-4 py-1 rounded text-sm font-medium">Editar perfil</a>
+                <button class="bg-gray-500 px-4 py-1 rounded text-sm font-medium">Ver archivo</button>
                 </div>
-                <!-- ... más historias ... -->
             </div>
 
-            <!-- Posts -->
-            <div class="max-w-[470px] mx-auto space-y-4">
-                <!-- Post -->
-                <article class="border border-zinc-800 rounded-lg bg-black">
-                    <div class="flex items-center p-3">
-                        <img src="https://via.placeholder.com/32" alt="Avatar" class="w-8 h-8 rounded-full">
-                        <div class="ml-3">
-                            <span class="font-semibold">usuario1</span>
-                        </div>
-                    </div>
-                    <img src="https://via.placeholder.com/470" alt="Post" class="w-full">
-                    <div class="p-3">
-                        <div class="flex gap-4 mb-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                        </div>
-                        <p><span class="font-semibold">94,877 Me gusta</span></p>
-                        <p><span class="font-semibold">usuario1</span> Descripción del post...</p>
-                    </div>
-                </article>
+            <!-- Stats -->
+            <div class="flex gap-8 text-sm">
+                <div><span class="font-semibold">{{ post_count }}</span> publicaciones</div>
+                <div><span class="font-semibold">{{ follower_count }}</span> seguidores</div>
+                <div><span class="font-semibold">{{ following_count }}</span> seguidos</div>
             </div>
-        </main>
-            <div class="container">
-        <h1>Hola, {{ user.username }}!</h1>
 
-        {% if messages %}
-            <ul class="messages">
-                {% for mensaje in messages %}
-                    <li{% if mensaje.tags %} class="{{ mensaje.tags }}"{% endif %}>{{ mensaje }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
-        <div class="suggestions-header">
-            <h2>Sugerencias para ti</h2>
-            <a href="{% url 'ver_todas_sugerencias' %}">Ver todo</a>
+            <!-- Bio -->
+            <div class="text-sm leading-snug">
+                <div class="font-semibold">{{ user.first_name }} {{ user.last_name }}</div>
+                <p>✨ Creador de Reels | Especialista en <span class="font-medium text-indigo-600">{{ user.specialty }}</span></p>
+                <p>🔹 {{ user.brand }}<br>
+                🔹 Contenido sobre {{ user.content_focus }}</p>
+                <p class="text-lg py-2">✦ ✦ ✦</p>
+                <p>{{ user.bio }}</p>
+                {% if user.link %}
+                <a href="{{ user.link }}" target="_blank" class="text-blue-500 hover:underline">{{ user.link }}</a>
+                {% endif %}
+                </div>
+            </div>
         </div>
 
-        <div>
-            {% for sugerencia in usuarios_sugeridos %}
-            <div class="user-suggestion">
-                <div class="h-10 w-10 rounded-full overflow-hidden relative">
-                    {# Aquí se muestra la foto de perfil del usuario sugerido #}
-                    <img src="{{ sugerencia.usuario.profile.avatar.url|default:'/media/perfiles/perfil_default.jpg' }}" alt="Foto de perfil de {{ sugerencia.usuario.username }}">
-                </div>
-                <div class="user-info">
-                    <h4>{{ sugerencia.usuario.username }}</h4>
-                    <p>{{ sugerencia.usuario.first_name }} {{ sugerencia.usuario.last_name }}</p>
-                    {% if sugerencia.conteo_seguidores_mutuos > 0 %}
-                        <p>
-                            {% if sugerencia.conteo_seguidores_mutuos == 1 %}
-                                <span style="font-weight: bold;">{{ request.user.username }}</span> sigue esta cuenta.
-                            {% else %}
-                                <span style="font-weight: bold;">{{ request.user.username }} y {{ sugerencia.conteo_seguidores_mutuos }} más</span> siguen esta cuenta.
-                            {% endif %}
-                        </p>
-                    {% endif %}
-                </div>
-                <a href="{% url 'seguir_usuario' sugerencia.usuario.username %}" class="follow-button">
-                    {# Aquí está el cambio clave: usamos la bandera 'es_seguido_por_actual' #}
-                    {% if sugerencia.es_seguido_por_actual %}
-                        Dejar de Seguir
-                    {% else %}
-                        Seguir
-                    {% endif %}
-                </a>
-            </div>
-            {% empty %}
-            <p>No hay sugerencias por ahora.</p>
-            {% endfor %}
+        <!-- Línea divisoria -->
+        <div class="border-t mt-8 pt-4 text-center text-gray-500 text-sm">
+            Aquí puedes añadir una galería, historias destacadas, o tabs como "Publicaciones", "Reels", etc.
         </div>
     </div>
-    </div>
+
+</div>
 </body>
 </html>

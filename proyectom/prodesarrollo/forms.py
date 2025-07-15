@@ -85,25 +85,34 @@ class RegistroForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password'])
+
         user.email = self.cleaned_data.get('email', None)
         user.telefono = self.cleaned_data.get('telefono', None)
 
+        necesita_verificacion = False
+
         if user.email:
+            # Requiere verificación por correo
             codigo = get_random_string(length=6, allowed_chars='1234567890')
             user.codigo_verificacion = codigo
-            user.email_verificado = False  # Aún no está verificado
+            user.email_verificado = False
+            necesita_verificacion = True
 
-            # Envía el correo
             send_mail(
                 'Código de verificación',
                 f'Tu código de verificación es: {codigo}',
-                'noreply@tuapp.com',  # Remitente
-                [user.email],         # Destinatario
+                'noreply@tuapp.com',
+                [user.email],
                 fail_silently=False,
             )
+        else:
+            user.email_verificado = True
+            user.codigo_verificacion = None
+
         if commit:
             user.save()
-        return user
+        return user, necesita_verificacion
+
 
 class LoginForm(forms.Form):
     identificador = forms.CharField(

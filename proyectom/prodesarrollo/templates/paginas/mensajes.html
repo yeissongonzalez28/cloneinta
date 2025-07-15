@@ -1,0 +1,112 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mensajes - {{ request.user.username }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white font-sans">
+
+<!-- Contenedor general -->
+<div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-[244px] border-r border-zinc-800 flex flex-col">
+        <div class="px-6 py-4 text-2xl font-bold border-b border-zinc-800">ChatApp</div>
+        <nav class="flex-1 p-4">
+            <!-- Agrega enlaces aquí -->
+            <a href="#" class="block py-2 px-3 rounded hover:bg-zinc-800">Inicio</a>
+            <a href="#" class="block py-2 px-3 rounded hover:bg-zinc-800">Perfil</a>
+            <a href="#" class="block py-2 px-3 rounded hover:bg-zinc-800">Configuración</a>
+        </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="flex-1 flex h-screen overflow-hidden">
+        <!-- Lista de conversaciones -->
+        <div class="w-[350px] border-r border-zinc-800 overflow-y-auto">
+            <div class="p-4 border-b border-zinc-800 text-xl font-semibold">Mensajes</div>
+            <ul>
+                <!-- Ejemplo de conversación -->
+                <li class="hover:bg-zinc-800 cursor-pointer px-4 py-3 flex items-center gap-3">
+                    <img src="https://via.placeholder.com/40" alt="perfil" class="rounded-full w-10 h-10">
+                    <div>
+                        <div class="font-semibold">emma_myers</div>
+                        <div class="text-zinc-400 text-sm">Hello 😁</div>
+                    </div>
+                </li>
+                <!-- Puedes replicar más conversaciones aquí -->
+            </ul>
+        </div>
+
+        <!-- Área de chat -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header del chat -->
+            <div class="flex items-center gap-3 border-b border-zinc-800 px-6 py-4">
+                <img src="https://via.placeholder.com/32" alt="perfil" class="rounded-full w-8 h-8">
+                <h2 class="font-semibold text-lg">{{ receiver.username }}</h2>
+            </div>
+
+            <!-- Chat log -->
+            <div id="chat-log" class="flex-1 overflow-y-auto p-6 space-y-3">
+                <!-- Mensajes aparecerán aquí -->
+            </div>
+
+            <!-- Input de mensaje -->
+            <div class="border-t border-zinc-800 p-4 flex items-center gap-3">
+                <input id="chat-message-input" type="text" placeholder="Escribe un mensaje..."
+                    class="flex-1 bg-zinc-900 text-white border border-zinc-700 rounded-full px-4 py-2 focus:outline-none">
+                <button id="chat-message-submit"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full font-semibold">Enviar</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Script WebSocket -->
+<script>
+    const userUsername = "{{ request.user.username }}";
+    const receiverUsername = "{{ receiver.username }}";
+    const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${receiverUsername}/`);
+
+    const chatLog = document.getElementById("chat-log");
+    const chatInput = document.getElementById("chat-message-input");
+    const chatSubmit = document.getElementById("chat-message-submit");
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const message = data.message;
+        const sender = data.sender;
+        const isSelf = sender === userUsername;
+
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("max-w-[70%]", "px-4", "py-2", "rounded-lg", "inline-block");
+        messageDiv.classList.add(isSelf ? "bg-blue-500 self-end ml-auto text-white" : "bg-zinc-700 text-white");
+
+        messageDiv.textContent = `${message}`;
+        chatLog.appendChild(messageDiv);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    };
+
+    chatSubmit.onclick = function() {
+        const message = chatInput.value;
+        if (message.trim() !== "") {
+            chatSocket.send(JSON.stringify({
+                message: message,
+                receiver: receiverUsername
+            }));
+            chatInput.value = "";
+        }
+    };
+
+    chatInput.addEventListener("keyup", function(e) {
+        if (e.key === "Enter") {
+            chatSubmit.click();
+        }
+    });
+</script>
+
+</body>
+</html>
