@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Instagram+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'myapp/css/inicio.css' %}">
     <style>
         body {
             background-color: black;
             color: white;
-            font-family: 'Instagram Sans', sans-serif;
         }
         .sidebar-icon {
             width: 24px;
@@ -24,9 +25,9 @@
 <body class="bg-black">
     <div class="flex">
         <!-- Barra lateral -->
-        <nav class="fixed h-screen w-[244px] border-r border-zinc-800 px-3 py-2 flex flex-col gap-2">
+        <nav class="fixed h-screen w-[202px] border-r border-zinc-800 px-1 py-1 flex flex-col">
             <div class="py-4 mb-4">
-                <img src="https://www.instagram.com/static/images/web/mobile_nav_type_logo_dark.png/ff9b85b8b7cd.png" alt="Instagram" class="h-[29px]">
+                <span class="logo-font text-5xl text-white">Instapp</span>
             </div>
             
             <a href="{% url 'inicio' %}" class="flex items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800">
@@ -84,19 +85,15 @@
 
             <!-- Stats -->
             <div class="flex gap-8 text-sm">
-                <div><span class="font-semibold">{{ post_count }}</span> publicaciones</div>
+                <div><span class="font-semibold">{{ request.user.publicaciones.count }}</span> publicaciones</div>
                 <div><span class="font-semibold">{{ follower_count }}</span> seguidores</div>
                 <div><span class="font-semibold">{{ following_count }}</span> seguidos</div>
             </div>
 
             <!-- Bio -->
             <div class="text-sm leading-snug">
-                <div class="font-semibold">{{ user.first_name }} {{ user.last_name }}</div>
-                <p>✨ Creador de Reels | Especialista en <span class="font-medium text-indigo-600">{{ user.specialty }}</span></p>
-                <p>🔹 {{ user.brand }}<br>
-                🔹 Contenido sobre {{ user.content_focus }}</p>
-                <p class="text-lg py-2">✦ ✦ ✦</p>
-                <p>{{ user.bio }}</p>
+                <p>{{ user.nombre_completo }}<br></p><br>
+                <p>{{ user.descripción }}</p>
                 {% if user.link %}
                 <a href="{{ user.link }}" target="_blank" class="text-blue-500 hover:underline">{{ user.link }}</a>
                 {% endif %}

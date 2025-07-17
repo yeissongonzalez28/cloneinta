@@ -5,3 +5,21 @@ body {
 .logo-font {
     font-family: 'Grand Hotel', cursive;
 }
+
+::-webkit-scrollbar {
+width: 10px;
+}
+::-webkit-scrollbar-track {
+background: #18181b; /* Fondo oscuro */
+}
+
+::-webkit-scrollbar-thumb {
+background-color: #52525b; /* Gris medio */
+border-radius: 9999px;
+border: 2px solid #18181b;
+}
+
+::-webkit-scrollbar-thumb:hover {
+background-color: #71717a; /* Gris más claro al hacer hover */
+cursor: pointer;
+}

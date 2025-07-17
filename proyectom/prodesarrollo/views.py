@@ -2,8 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from .forms import RegistroForm
-from .forms import LoginForm
+from .forms import *
 from .models import *
 from django.contrib.auth import login
 from django.contrib import messages
@@ -12,7 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 
+
 # Create your views here.
+@login_required
 def index(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -126,6 +127,7 @@ Usuario = get_user_model()
 
 @login_required
 def inicio(request):
+    form = PublicacionForm()
     usuarios_sugeridos = obtener_usuarios_sugeridos(request.user, limite=5)
 
     usuarios_con_conteo_mutuo = []
@@ -135,20 +137,19 @@ def inicio(request):
             seguido=usuario_obj
         ).count()
 
-        # NUEVA LÓGICA EN LA VISTA: Verificar si el usuario actual ya sigue a este sugerido
-        # Esto se hace aquí, antes de pasar los datos a la plantilla.
         es_seguido_por_actual = Seguimiento.objects.filter(
             seguidor=request.user,
             seguido=usuario_obj
-        ).exists() # .exists() devuelve True o False
+        ).exists()
 
         usuarios_con_conteo_mutuo.append({
             'usuario': usuario_obj,
             'conteo_seguidores_mutuos': conteo_mutuo,
-            'es_seguido_por_actual': es_seguido_por_actual, # Añadimos esta bandera booleana al diccionario
+            'es_seguido_por_actual': es_seguido_por_actual,
         })
 
     contexto = {
+        'form': form,  # 🔥 Esto es lo que te faltaba
         'usuarios_sugeridos': usuarios_con_conteo_mutuo,
     }
     return render(request, 'paginas/inicio.html', contexto)
@@ -209,30 +210,46 @@ def ver_todas_sugerencias(request):
 
 # ---------------------------
 
-
+@login_required
 def perfil(request, username):
     usuario = get_object_or_404(Usuario, username=username)
 
-
+    publicacion_count = usuario.publicaciones.count()
     follower_count = Seguimiento.objects.filter(seguido=usuario).count()
     following_count = Seguimiento.objects.filter(seguidor=usuario).count()
 
     context = {
         'user': usuario,
-
+        'publicaciones': publicacion_count,
         'follower_count': follower_count,
         'following_count': following_count,
     }
     return render(request, 'paginas/perfil.html', context)
 
+@login_required
 def editar_perfil(request):
     if request.method == 'POST':
-        form = RegistroForm(request.POST, request.FILES, instance=request.user)
+        form = EditarPerfilForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Perfil actualizado correctamente.')
             return redirect('perfil', username=request.user.username)
     else:
-        form = RegistroForm(instance=request.user)
+        form = EditarPerfilForm(instance=request.user)
 
     return render(request, 'paginas/editar_perfil.html', {'form': form})
+
+from django.http import JsonResponse
+# ------------------------------------------------------
+@login_required
+def crear_publicacion(request):
+    if request.method == 'POST':
+        form = PublicacionForm(request.POST, request.FILES)
+        if form.is_valid():
+            publicacion = form.save(commit=False)
+            publicacion.autor = request.user
+            publicacion.save()
+            return redirect('inicio')  # Cambia por la vista a la que quieres redirigir
+    else:
+        form = PublicacionForm()
+    return render(request, 'paginas/crear_publi.html', {'form': form})

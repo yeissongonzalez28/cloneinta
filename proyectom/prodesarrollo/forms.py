@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 import re
-from .models import Usuario
+from .models import *
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 
@@ -125,3 +125,67 @@ class LoginForm(forms.Form):
         widget=forms.PasswordInput(attrs={'placeholder': 'Contraseña',
             'class': 'bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-400 focus:outline-none w-full'})
     )
+
+
+class EditarPerfilForm(forms.ModelForm):
+    class Meta:
+        model = Usuario
+        fields = ['nombre_completo', 'email', 'telefono', 'descripción', 'edad', 'genero']
+        widgets = {
+            'nombre_completo': forms.TextInput(attrs={
+                'class': 'w-full bg-zinc-900 text-white border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500',
+                'placeholder': 'Nombre completo'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full bg-zinc-900 text-white border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500',
+                'placeholder': 'Correo electrónico'
+            }),
+            'telefono': forms.TextInput(attrs={
+                'class': 'w-full bg-zinc-900 text-white border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500',
+                'placeholder': 'Número de teléfono'
+            }),
+            'descripción': forms.Textarea(attrs={
+                'class': 'w-full bg-zinc-900 text-white border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 resize-none',
+                'rows': 3,
+                'placeholder': 'Presentación o descripción'
+            }),
+            'edad': forms.NumberInput(attrs={
+                'class': 'w-full bg-zinc-900 text-white border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500',
+                'placeholder': 'Edad'
+            }),
+            'genero': forms.Select(attrs={
+                'class': 'w-full bg-zinc-900 text-white border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500'
+            }),
+        }
+
+# -----------------------------------------------
+class PublicacionForm(forms.ModelForm):
+    class Meta:
+        model = Publicacion
+        fields = ['archivo', 'descripcion']
+        widgets = {
+            'archivo': forms.ClearableFileInput(attrs={
+                'class': 'w-full border px-4 py-2 bg-white text-black rounded',
+                'accept': 'image/*,video/*',
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'w-full border px-4 py-2 bg-neutral-700 text-white rounded',
+                'rows': 3,
+                'placeholder': 'Escribe una descripción...'
+            }),
+        }
+    def clean_archivo(self):
+        archivo = self.cleaned_data.get('archivo')
+        if archivo:
+            # Validar extensión
+            extensiones_validas = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mkv']
+            ext = archivo.name.split('.')[-1].lower()
+            
+            if ext not in extensiones_validas:
+                raise forms.ValidationError("Solo se permiten fotos (JPG, PNG, GIF) o videos (MP4, MOV, AVI)")
+            
+            # Validar tamaño (1gb)
+            if archivo.size > 1097152000:
+                raise forms.ValidationError("El archivo es demasiado grande (máximo 1Gb)")
+        
+        return archivo
