@@ -1,32 +1,32 @@
-<div id="modalPublicacion" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-  <div class="bg-neutral-700 p-6 rounded shadow-lg w-full max-w-md">
+<!-- Modal Crear Publicación -->
+<div id="modalPublicacion" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+  <div class="bg-neutral-800 p-6 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
     <form method="POST" enctype="multipart/form-data" action="{% url 'crear_publicacion' %}">
       {% csrf_token %}
-      <h2 class="text-center text-3xl mb-6" style="font-family: 'Grand Hotel', cursive;">Crear publicación</h2>
 
-      <!-- Selector de archivo -->
-      <div class="mb-5">
-        <label class="block text-sm mb-1 text-white">Seleccionar imagen o video</label>
-        {{ form.archivo }}
+      <h2 class="text-3xl text-center text-white mb-6" style="font-family: 'Grand Hotel', cursive;">Crear publicación</h2>
+
+      <!-- Selector de archivos -->
+      <div class="mb-4">
+        <input type="file" name="archivos" id="file-upload" multiple accept="image/*,video/*" class="hidden">
+        <label for="file-upload" class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md">
+          + Agregar archivo
+        </label>
       </div>
 
       <!-- Vista previa -->
-      <div id="preview" class="mb-5 hidden">
-        <p class="text-white text-sm mb-2">Vista previa:</p>
-        <div id="preview-container" class="w-full rounded overflow-hidden border border-neutral-400"></div>
-      </div>
+      <div id="preview-container" class="grid grid-cols-3 gap-2 mb-4"></div>
 
       <!-- Descripción -->
-      <div class="mb-5">
-        <label class="block text-sm text-white mb-1">Descripción</label>
+      <div class="mb-4">
         {{ form.descripcion }}
       </div>
 
-          <div class="flex justify-end mt-4">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Publicar</button>
-          </div>
+      <!-- Botones -->
+      <div class="flex justify-end gap-2">
+        <button type="button" class="bg-red-600 text-white px-4 py-2 rounded" id="cancelarModal">Cancelar</button>
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Publicar</button>
+      </div>
     </form>
   </div>
 </div>
-
-

@@ -162,30 +162,11 @@ class EditarPerfilForm(forms.ModelForm):
 class PublicacionForm(forms.ModelForm):
     class Meta:
         model = Publicacion
-        fields = ['archivo', 'descripcion']
+        fields = ['descripcion']
         widgets = {
-            'archivo': forms.ClearableFileInput(attrs={
-                'class': 'w-full border px-4 py-2 bg-white text-black rounded',
-                'accept': 'image/*,video/*',
-            }),
             'descripcion': forms.Textarea(attrs={
                 'class': 'w-full border px-4 py-2 bg-neutral-700 text-white rounded',
                 'rows': 3,
                 'placeholder': 'Escribe una descripción...'
             }),
         }
-    def clean_archivo(self):
-        archivo = self.cleaned_data.get('archivo')
-        if archivo:
-            # Validar extensión
-            extensiones_validas = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mkv']
-            ext = archivo.name.split('.')[-1].lower()
-            
-            if ext not in extensiones_validas:
-                raise forms.ValidationError("Solo se permiten fotos (JPG, PNG, GIF) o videos (MP4, MOV, AVI)")
-            
-            # Validar tamaño (1gb)
-            if archivo.size > 1097152000:
-                raise forms.ValidationError("El archivo es demasiado grande (máximo 1Gb)")
-        
-        return archivo

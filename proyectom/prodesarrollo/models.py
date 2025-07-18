@@ -113,49 +113,38 @@ class Seguimiento(models.Model):
         return f"{self.seguidor.username} sigue a {self.seguido.username}"
     
 # -----------------------------------------------------------
-def upload_to(instance, filename):
-    ext = filename.split('.')[-1]
-    nuevo_nombre = f"{uuid4().hex}.{ext}"
-    
-    # Organiza por tipo de medio
-    if instance.is_video():
-        return os.path.join('publicaciones/videos', nuevo_nombre)
-    return os.path.join('publicaciones/fotos', nuevo_nombre)
 
 
 class Publicacion(models.Model):
     autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='publicaciones')
-    archivo = models.FileField(upload_to='publicaciones/', null=True, blank=True, verbose_name="Imagen/Video")
     descripcion = models.TextField(blank=True, max_length=2200)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     me_gusta = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='me_gusta', blank=True)
 
-    def __str__(self):
-        return f"Publicación de {self.autor.username} - {self.fecha_creacion.date()}"
-    
-    def es_imagen(self):
-        """Determina si el archivo es una imagen"""
-        return self.archivo.name.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp'))
-    
-    def es_video(self):
-        """Determina si el archivo es un video"""
-        return self.archivo.name.lower().endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm'))
-    
-    def tipo_contenido(self):
-        """Devuelve el tipo de contenido como texto"""
-        if self.es_imagen():
-            return 'imagen'
-        elif self.es_video():
-            return 'video'
-        return 'desconocido'
-    
     def total_me_gusta(self):
         return self.me_gusta.count()
 
     class Meta:
         ordering = ['-fecha_creacion']
-        verbose_name = 'Publicación'
-        verbose_name_plural = 'Publicaciones'
+
+
+
+class ArchivoPublicacion(models.Model):
+    publicacion = models.ForeignKey(Publicacion, related_name='archivos', on_delete=models.CASCADE)
+    archivo = models.FileField(upload_to='publicaciones/')
+
+    def es_imagen(self):
+        return self.archivo.name.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp'))
+
+    def es_video(self):
+        return self.archivo.name.lower().endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm'))
+
+    def tipo(self):
+        if self.es_imagen():
+            return 'imagen'
+        elif self.es_video():
+            return 'video'
+        return 'otro'
 
 
 class Comentario(models.Model):

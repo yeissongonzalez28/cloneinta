@@ -128,6 +128,7 @@ Usuario = get_user_model()
 @login_required
 def inicio(request):
     form = PublicacionForm()
+    publicaciones = Publicacion.objects.select_related('autor').all().order_by('-fecha_creacion')
     usuarios_sugeridos = obtener_usuarios_sugeridos(request.user, limite=5)
 
     usuarios_con_conteo_mutuo = []
@@ -151,6 +152,7 @@ def inicio(request):
     contexto = {
         'form': form,  # 🔥 Esto es lo que te faltaba
         'usuarios_sugeridos': usuarios_con_conteo_mutuo,
+        'publicaciones': publicaciones,
     }
     return render(request, 'paginas/inicio.html', contexto)
 
@@ -244,12 +246,31 @@ from django.http import JsonResponse
 @login_required
 def crear_publicacion(request):
     if request.method == 'POST':
-        form = PublicacionForm(request.POST, request.FILES)
+        form = PublicacionForm(request.POST)
+        archivos = request.FILES.getlist('archivos')  # 'archivos' debe coincidir con el name del input file
+
+        # Validación manual
+        extensiones_validas = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mkv']
+        for archivo in archivos:
+            ext = archivo.name.split('.')[-1].lower()
+            if ext not in extensiones_validas:
+                form.add_error(None, f"El archivo '{archivo.name}' no es una extensión válida.")
+            if archivo.size > 1024 * 1024 * 1024:
+                form.add_error(None, f"El archivo '{archivo.name}' supera el límite de 1 GB.")
+
         if form.is_valid():
             publicacion = form.save(commit=False)
             publicacion.autor = request.user
             publicacion.save()
-            return redirect('inicio')  # Cambia por la vista a la que quieres redirigir
+
+            for archivo in archivos:
+                ArchivoPublicacion.objects.create(publicacion=publicacion, archivo=archivo)
+
+            return redirect('inicio')  # Cambia esto según tu ruta
+
     else:
         form = PublicacionForm()
-    return render(request, 'paginas/crear_publi.html', {'form': form})
+
+    publicaciones = Publicacion.objects.prefetch_related('archivos').all()
+
+    return render(request, 'paginas/inicio.html', {'form': form, 'publicaciones': publicaciones})
