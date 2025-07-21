@@ -20,10 +20,13 @@ function toggleMenu() {
     const menu = document.getElementById("dropdownMenu");
     menu.classList.toggle("hidden");
 }
-
+function Menumas() {
+    const menu = document.getElementById("MasMenu");
+    menu.classList.toggle("hidden");
+}
   // Opcional: cerrar si haces clic fuera
 document.addEventListener("click", function (event) {
-    const menu = document.getElementById("dropdownMenu");
+    const menu = document.getElementById("dropdownMenu , MasMenu");
     const button = event.target.closest("button");
     if (!menu.contains(event.target) && !button) {
     menu.classList.add("hidden");
@@ -50,8 +53,6 @@ document.addEventListener("click", function (event) {
       }
     });
   });
-
-
 
 
 
@@ -138,4 +139,3 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(video);
   });
 });
-

@@ -10,10 +10,12 @@ import random
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
-
+from .recomendaciones import obtener_usuarios_sugeridos
+from django.contrib.auth import get_user_model
+Usuario = get_user_model()
 
 # Create your views here.
-@login_required
+
 def index(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -119,11 +121,6 @@ def chat(request, username):
     return render(request, 'paginas/mensajes.html', {
         'receiver': receiver
     })
-
-
-from .recomendaciones import obtener_usuarios_sugeridos
-from django.contrib.auth import get_user_model
-Usuario = get_user_model()
 
 @login_required
 def inicio(request):

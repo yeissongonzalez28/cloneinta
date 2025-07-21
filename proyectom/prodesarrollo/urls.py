@@ -1,9 +1,11 @@
 from django.contrib import admin
 from django.urls import path,include
 from . import views
+from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('', LogoutView.as_view(next_page='index'), name='cerrarse'),
     path('registro', views.registro_usuario, name='registro'),
     path('inicio', views.inicio, name='inicio'),
     path('verificar', views.verificar_codigo, name='verificar'),

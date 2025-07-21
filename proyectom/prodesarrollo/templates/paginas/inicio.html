@@ -23,8 +23,8 @@
     </style>
 </head>
 <body class="bg-black">
+
     <div class="flex">
-        <!-- Barra lateral -->
         <nav class="fixed h-screen w-[72px] xl:w-[250px] border-r border-zinc-800 px-1 py-1 flex flex-col items-start">
             <div class="py-4 mb-4 mt-2">
                 <span class="logo-font text-5xl text-white hidden xl:inline mx-4">Instapp</span>
@@ -60,26 +60,26 @@
                 <span class="hidden xl:inline">Notificaciones</span>
             </a>
             <div class="w-[240px] relative inline-block text-left">
-                <!-- Botón Crear -->
+
                 <button onclick="toggleMenu()" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                     <svg class="sidebar-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M2 12v3.45c0 2.849.698 4.005 1.606 4.944.94.909 2.098 1.608 4.946 1.608h6.896c2.848 0 4.006-.7 4.946-1.608C21.302 19.455 22 18.3 22 15.45V8.552c0-2.849-.698-4.006-1.606-4.945C19.454 2.7 18.296 2 15.448 2H8.552c-2.848 0-4.006.699-4.946 1.607C2.698 4.547 2 5.703 2 8.552z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="6.545" x2="17.455" y1="12.001" y2="12.001"/><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="12.003" x2="12.003" y1="6.545" y2="17.455"/></svg>
                 <span class="hidden xl:inline">Crear</span>
                 </button>
 
-                <!-- Menú desplegable -->
+
                 <div id="dropdownMenu" class="hidden absolute w-full origin-top-right rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <button id="abrirModal" class="flex w-full items-center gap-2 px-4 py-2 rounded-md hover:bg-neutral-700">Publicación
+                    <button id="abrirModal" class="flex w-full items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Publicación
                     <img src="{% static 'myapp/img/camara.png' %}" alt="publi" class="w-8 h-8 ml-[45%]">
                     </button>
-                    <a href="#" class="flex items-center gap-2 px-4 py-3 rounded-md hover:bg-neutral-700">
+                    <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
                     Historia
                     <img src="{% static 'myapp/img/historia.png' %}" alt="historia" class="w-6 h-6 ml-[60%]">
                     </a>
-                    <a href="#" class="flex items-center gap-2 px-4 py-3 rounded-md hover:bg-neutral-700">
+                    <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
                     Anuncio
                     <img src="{% static 'myapp/img/anuncio.png' %}" alt="anuncio" class="w-6 h-6 ml-[58%]">
                     </a>
-                    <a href="#" class="flex items-center gap-2 px-4 py-3 rounded-md hover:bg-neutral-700">
+                    <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
                     IA
                     <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6 ml-[80%]">
                     </a>
@@ -91,22 +91,44 @@
                 <span class="hidden xl:inline">Perfil</span>
             </a>
             
-            <a href="#" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[110%]">
+            <a href="https://www.meta.ai/" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[110%]">
             <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6">
             <span class="hidden xl:inline">Meta AI</span>
             </a>
 
-            <a href="#" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
-            <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6">
-            <span class="hidden xl:inline">Más</span>
-            </a>
+            <div class="w-[240px] relative inline-block text-left">
+                <button onclick="Menumas()" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+                    <svg class="sidebar-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M2 12v3.45c0 2.849.698 4.005 1.606 4.944.94.909 2.098 1.608 4.946 1.608h6.896c2.848 0 4.006-.7 4.946-1.608C21.302 19.455 22 18.3 22 15.45V8.552c0-2.849-.698-4.006-1.606-4.945C19.454 2.7 18.296 2 15.448 2H8.552c-2.848 0-4.006.699-4.946 1.607C2.698 4.547 2 5.703 2 8.552z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="6.545" x2="17.455" y1="12.001" y2="12.001"/><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="12.003" x2="12.003" y1="6.545" y2="17.455"/></svg>
+                <span class="hidden xl:inline">Más</span>
+                </button>
+
+                <div id="MasMenu" class="hidden absolute bottom-full w-full origin-top-right rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <a href="{% url 'editar_perfil' %}" class="flex w-full items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Configuración
+                    <img src="{% static 'myapp/img/confi.png' %}" alt="publi" class="w-7 h-7 ml-[35%]">
+                    </a>
+                    <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-neutral-700 mb-2">
+                    Cambiar apariencia
+                    <img src="{% static 'myapp/img/apariencia.png' %}" alt="historia" class="w-7 h-7 ml-[48%]">
+                    </a>
+                    <div class="border-t-4 border-b-2 border-neutral-700 mb-2 py-2">
+                        <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+                        Cambiar cuenta
+                        <img src="{% static 'myapp/img/cambiar.png' %}" alt="anuncio" class="w-6 h-6 ml-[30%] rounded-full">
+                        </a>
+                    </div>
+                    <a href="{% url 'cerrarse' %}" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+                    Salir
+                    <img src="{% static 'myapp/img/salir.png' %}" alt="ai" class="w-7 h-7 ml-[67%]">
+                    </a>
+                </div>
+            </div>
         </nav>
 
-        <!-- Contenido principal -->
+
         <main class="flex-1 p-8">
-            <!-- Stories -->
+
             <div class="max-w-xl mx-auto space-y-6 mt-2">
-                <!-- Repetir para cada historia -->
+
                 <div class="flex flex-col items-center">
                     <div class="story-ring p-[2px] rounded-full">
                         <div class="bg-black p-[2px] rounded-full">
@@ -115,47 +137,42 @@
                     </div>
                     <span class="text-xs mt-1">usuario1</span>
                 </div>
-                <!-- ... más historias ... -->
+
             </div>
 
-<div class="max-w-xl mx-auto space-y-6 mt-2">
-    {% for publicacion in publicaciones %}
-        <!-- Header del post -->
-        <div class="flex items-center gap-3">
-           
-            <span class="font-semibold">{{ publicacion.autor.username }}</span>
-        </div>
+            <div class="max-w-xl mx-auto space-y-6 mt-2">
+                {% for publicacion in publicaciones %}
 
-
-        <!-- Carrusel -->
-        <div class="relative overflow-hidden rounded-md bg-zinc-900 shadow-md w-[500px] h-[700px]" id="carousel-{{ forloop.counter }}">
-                {% for archivo in publicacion.archivos.all %}
-                    <div class="bg-zinc-900 rounded-lg shadow-md overflow-hidden w-[500px] h-[700px]">
-                        {% if archivo.es_imagen %}
-                            <img src="{{ archivo.archivo.url }}" alt="Imagen" class="w-full h-full object-cover">
-                        {% elif archivo.es_video %}
-                        <div class="video-container bg-zinc-900 rounded-lg shadow-md overflow-hidden w-[500px] h-[700px]">
-                            <video class="video-player w-full h-full object-cover" src="{{ archivo.archivo.url }}"muted loop playsinline></video>
-                                <div class="controls">
-                                <button class="mute-toggle">🔇</button>
-                                <input type="range" class="seek-bar" value="0">
-                                </div>
-                        </div>
-                        {% endif %}
+                    <div class="flex items-center gap-3">
+                    
+                        <span class="font-semibold">{{ publicacion.autor.username }}</span>
+                        {% load customtime %}
+                        <p class="text-xs text-gray-500 mt-1">Hace {{ publicacion.fecha_creacion|timesince_con_y }} </p>
                     </div>
-                {% endfor %}
+
+                    <div class="relative overflow-hidden rounded-md bg-zinc-900 shadow-md w-[500px] h-[700px]" id="carousel-{{ forloop.counter }}">
+                            {% for archivo in publicacion.archivos.all %}
+                                <div class="bg-zinc-900 rounded-lg shadow-md overflow-hidden w-[500px] h-[700px]">
+                                    {% if archivo.es_imagen %}
+                                        <img src="{{ archivo.archivo.url }}" alt="Imagen" class="w-full h-full object-cover">
+                                    {% elif archivo.es_video %}
+                                    <div class="video-container bg-zinc-900 rounded-lg shadow-md overflow-hidden w-[500px] h-[700px]">
+                                        <video class="video-player w-full h-full object-cover" src="{{ archivo.archivo.url }}"muted loop playsinline></video>
+                                            <div class="controls">
+                                            <button class="mute-toggle">🔇</button>
+                                            <input type="range" class="seek-bar" value="0">
+                                            </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    <div class="text-sm text-gray-300">
+                        <p class="mt-2">{{ publicacion.descripcion }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ publicacion.fecha_creacion|date:"d M Y H:i" }}</p>
+                    </div>
+                        {% endfor %}
             </div>
-
-
-        <!-- Descripción y fecha -->
-        <div class="text-sm text-gray-300">
-            <p class="mt-2">{{ publicacion.descripcion }}</p>
-            <p class="text-xs text-gray-500 mt-1">{{ publicacion.fecha_creacion|date:"d M Y H:i" }}</p>
-        </div>
-    {% endfor %}
-</div>
-
-
 
         </main>
         <div class="hidden xl:block fixed right-10 top-24 w-72">
