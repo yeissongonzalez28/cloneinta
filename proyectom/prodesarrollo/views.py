@@ -109,19 +109,75 @@ def reenviar_codigo(request):
 
 
 # ----------------------------------------------------------------
-
+from django.views.decorators.csrf import csrf_exempt
 
 @login_required
 def mensajes(request):
-    return render(request, 'paginas/mensajes.html')
+    usuario_actual = request.user  # Asumiendo que usas `Usuario` como modelo de usuario
+    seguidos = Usuario.objects.filter(
+        seguidores_de__seguidor=usuario_actual
+    ).distinct()
+
+    return render(request, 'paginas/mensajes.html', {
+        'seguidos': seguidos,
+    })
+
 
 @login_required
 def chat(request, username):
-    receiver = get_object_or_404(Usuario, username=username)
+    receptor = get_object_or_404(Usuario, username=username)
+
+    mensajes = Message.objects.filter(
+        enviar__in=[request.user, receptor],
+        recibir__in=[request.user, receptor]
+    ).order_by('fecha_envio')
+
     return render(request, 'paginas/mensajes.html', {
-        'receiver': receiver
+        'receptor': receptor,
+        'mensajes': mensajes
     })
 
+@csrf_exempt
+@login_required
+def enviar_mensaje(request):
+    if request.method == 'POST':
+        contenido = request.POST.get('mensaje')
+        receptor_username = request.POST.get('receptor')
+        receptor = Usuario.objects.get(username=receptor_username)
+
+        mensaje = Message.objects.create(
+            enviar=request.user,
+            recibir=receptor,
+            contenido=contenido,
+            fecha_envio=timezone.now()
+        )
+
+        return JsonResponse({
+            'estado': 'ok',
+            'mensaje': mensaje.contenido,
+            'fecha': mensaje.fecha_envio.strftime('%H:%M')
+        })
+    return JsonResponse({'estado': 'error'})
+
+def obtener_mensajes(request, username):
+    receptor = get_object_or_404(Usuario, username=username)
+    mensajes = Message.objects.filter(
+        enviar__in=[request.user, receptor],
+        recibir__in=[request.user, receptor]
+    ).order_by('fecha_envio')
+
+    data = [
+        {
+            'contenido': msg.contenido,
+            'enviar': msg.enviar.username,
+            'fecha': msg.fecha_envio.strftime('%H:%M')
+        }
+        for msg in mensajes
+    ]
+
+    return JsonResponse({'mensajes': data})
+
+# ----------------------------------------
 @login_required
 def inicio(request):
     form = PublicacionForm()

@@ -124,86 +124,94 @@
 
     <main class="flex-1 flex h-screen overflow-hidden">
 
-        <div class="w-[350px] border-r border-zinc-800 overflow-y-auto">
+        <div class="w-[350px] border-r border-zinc-800 overflow-y-auto ml-[72px]">
             <div class="p-4 border-b border-zinc-800 text-xl font-semibold">Mensajes</div>
             <ul>
-                <!-- Ejemplo de conversación -->
+                {% for seguido in seguidos %}
                 <li class="hover:bg-zinc-800 cursor-pointer px-4 py-3 flex items-center gap-3">
-                    <img src="https://via.placeholder.com/40" alt="perfil" class="rounded-full w-10 h-10">
-                    <div>
-                        <div class="font-semibold">emma_myers</div>
-                        <div class="text-zinc-400 text-sm">Hello 😁</div>
-                    </div>
+                    <a href="{% url 'chat' seguido.username %}" class="flex items-center gap-3">
+                        
+                        <div>
+                            <div class="font-semibold text-white">{{ seguido.username }}</div>
+                            <div class="text-zinc-400 text-sm">Enviar mensaje</div>
+                        </div>
+                    </a>
                 </li>
-                <!-- Puedes replicar más conversaciones aquí -->
+                {% empty %}
+                <li class="text-center text-zinc-400 px-4 py-4">No estás siguiendo a nadie aún.</li>
+                {% endfor %}
             </ul>
         </div>
 
-        <!-- Área de chat -->
-        <div class="flex-1 flex flex-col">
-            <!-- Header del chat -->
-            <div class="flex items-center gap-3 border-b border-zinc-800 px-6 py-4">
-                <img src="https://via.placeholder.com/32" alt="perfil" class="rounded-full w-8 h-8">
-                <h2 class="font-semibold text-lg">{{ receiver.username }}</h2>
+        <div class="flex-1 p-4">
+            {% if receptor %}
+            <h2 class="text-lg font-bold">Chat con {{ receptor.username }}</h2>
+
+            <div id="chat-box" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+                {% for mensaje in mensajes %}
+                <div>
+                    <strong>{{ mensaje.enviar.username }}:</strong> {{ mensaje.contenido }}
+                </div>
+                {% endfor %}
             </div>
 
-            <!-- Chat log -->
-            <div id="chat-log" class="flex-1 overflow-y-auto p-6 space-y-3">
-                <!-- Mensajes aparecerán aquí -->
-            </div>
-
-            <!-- Input de mensaje -->
-            <div class="border-t border-zinc-800 p-4 flex items-center gap-3">
-                <input id="chat-message-input" type="text" placeholder="Escribe un mensaje..."
-                    class="flex-1 bg-zinc-900 text-white border border-zinc-700 rounded-full px-4 py-2 focus:outline-none">
-                <button id="chat-message-submit"
-                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full font-semibold">Enviar</button>
-            </div>
+            <form id="chat-form">
+                {% csrf_token %}
+                <input type="hidden" id="receptor" value="{{ receptor.username }}">
+                <input type="text" id="mensaje" placeholder="Escribe un mensaje..." required>
+                <button type="submit">Enviar</button>
+            </form>
+            {% else %}
+            <p>Selecciona un usuario para comenzar a chatear.</p>
+            {% endif %}
         </div>
+
     </main>
 </div>
 
-<!-- Script WebSocket -->
 <script>
-    const userUsername = "{{ request.user.username }}";
-    const receiverUsername = "{{ receiver.username }}";
-    const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${receiverUsername}/`);
+    const form = document.getElementById('chat-form');
+    const mensajeInput = document.getElementById('mensaje');
+    const receptor = document.getElementById('receptor')?.value;
+    const chatBox = document.getElementById('chat-box');
 
-    const chatLog = document.getElementById("chat-log");
-    const chatInput = document.getElementById("chat-message-input");
-    const chatSubmit = document.getElementById("chat-message-submit");
+    form?.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-    chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        const message = data.message;
-        const sender = data.sender;
-        const isSelf = sender === userUsername;
-
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add("max-w-[70%]", "px-4", "py-2", "rounded-lg", "inline-block");
-        messageDiv.classList.add(isSelf ? "bg-blue-500 self-end ml-auto text-white" : "bg-zinc-700 text-white");
-
-        messageDiv.textContent = `${message}`;
-        chatLog.appendChild(messageDiv);
-        chatLog.scrollTop = chatLog.scrollHeight;
-    };
-
-    chatSubmit.onclick = function() {
-        const message = chatInput.value;
-        if (message.trim() !== "") {
-            chatSocket.send(JSON.stringify({
-                message: message,
-                receiver: receiverUsername
-            }));
-            chatInput.value = "";
-        }
-    };
-
-    chatInput.addEventListener("keyup", function(e) {
-        if (e.key === "Enter") {
-            chatSubmit.click();
-        }
+        fetch("{% url 'enviar_mensaje' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                mensaje: mensajeInput.value,
+                receptor: receptor
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.estado === 'ok') {
+                chatBox.innerHTML += `<div><strong>${data.emisor}:</strong> ${data.mensaje}</div>`;
+                mensajeInput.value = '';
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });
     });
+
+    // Cargar mensajes cada 3 segundos
+    setInterval(() => {
+        if (!receptor) return;
+        fetch(`/obtener_mensajes/${receptor}/`)
+            .then(response => response.json())
+            .then(data => {
+                chatBox.innerHTML = '';
+                data.mensajes.forEach(msg => {
+                    chatBox.innerHTML += `<div><strong>${msg.emisor}:</strong> ${msg.contenido}</div>`;
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+    }, 2000);
 </script>
 
 <script src="{% static 'myapp/js/inicio.js' %}"></script>

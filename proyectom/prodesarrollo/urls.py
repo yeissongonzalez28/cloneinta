@@ -10,11 +10,14 @@ urlpatterns = [
     path('inicio', views.inicio, name='inicio'),
     path('verificar', views.verificar_codigo, name='verificar'),
     path('reenviar', views.reenviar_codigo, name='reenviar_codigo'),
-    path('mensajes', views.mensajes, name='mensajes'),
+    path('mensajes/', views.mensajes, name='mensajes'),
     path('seguir/<str:nombre_usuario>/', views.seguir_usuario, name='seguir_usuario'),
     path('sugerencias/todas/', views.ver_todas_sugerencias, name='ver_todas_sugerencias'),
     path('perfil/<str:username>/', views.perfil, name='perfil'),
     path('editar_perfil', views.editar_perfil, name='editar_perfil'),
     path('crear/', views.crear_publicacion, name='crear_publicacion'),
-    path('<str:username>/', views.chat, name='chat'),
+    path('mensajes/', views.mensajes, name='mensajes'),  # Para ver a quién sigues
+    path('mensajes/<str:username>/', views.chat, name='chat'),
+    path('enviar_mensaje/', views.enviar_mensaje, name='enviar_mensaje'),
+    path('obtener_mensajes/<str:username>/', views.obtener_mensajes, name='obtener_mensajes'),
 ]
