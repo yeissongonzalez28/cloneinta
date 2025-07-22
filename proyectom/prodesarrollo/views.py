@@ -327,3 +327,25 @@ def crear_publicacion(request):
     publicaciones = Publicacion.objects.prefetch_related('archivos').all()
 
     return render(request, 'paginas/inicio.html', {'form': form, 'publicaciones': publicaciones})
+
+def buscar_usuarios(request):
+    query = request.GET.get('q', '')
+    usuarios = []
+    
+    if query:
+        usuarios = Usuario.objects.filter(
+            username__icontains=query
+        ).exclude(username=request.user.username)[:5]  # Limitamos a 5 resultados
+        
+        resultados = []
+        for usuario in usuarios:
+            resultados.append({
+                'username': usuario.username,
+                'nombre_completo': usuario.nombre_completo,
+                'avatar': usuario.imagen_perfil.url if usuario.imagen_perfil else '/media/perfiles/perfil_default.jpg',
+                'seguidores': usuario.seguidores_de.count()
+            })
+        
+        return JsonResponse({'usuarios': resultados})
+    
+    return JsonResponse({'usuarios': []})
