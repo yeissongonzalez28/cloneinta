@@ -24,7 +24,7 @@
 </head>
 <body class="bg-black text-white font-sans">
     <div class="flex">
-        <nav class="fixed h-screen w-[72px] overflow-x-hidden transition-all duration-300 border-r border-zinc-800 px-1 py-1 flex flex-col items-center bg-black z-50">            
+        <nav class="fixed h-screen w-[72px] overflow-x-hidden transition-all duration-300 border-r border-zinc-800 px-1 py-1 flex flex-col items-center bg-black z-50">
             <div class="py-4 mb-4 mt-2">
                 <img src="{% static 'myapp/img/instagram.png' %}" alt="instagram" class="w-6 h-6 mb-4 mt-2">
             </div>
@@ -34,23 +34,42 @@
                 <span class="hidden">Inicio</span>
             </a>
 
-            <a href="#" class="flex justify-center w-full px-3 py-3 rounded-lg hover:bg-zinc-800 mt-3">
-                <svg class="sidebar-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M19 10.5A8.5 8.5 0 1110.5 2a8.5 8.5 0 018.5 8.5z"/><path fill="none" stroke="currentColor" d="M16.511 16.511L22 22"/></svg>
-                <span class="hidden">Buscar</span>
-            </a>
+                <button onclick="toggleSearch()" class="flex justify-center w-full gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mt-3 ">
+                <img src="{% static 'myapp/img/busqueda.png' %}" alt="busqueda" class="w-7 h-7">
+                </button>
+
+                <div id="searchPanel" class="hidden absolute left-16 w-96 bg-neutral-800 rounded-xl shadow-xl mt-2 z-50">
+                    <div class="p-4">
+                        <div class="flex items-center gap-3 pb-3 border-b border-neutral-700">
+                            <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                            </svg>
+                            <input type="text"
+                                id="searchInput"
+                                class="w-full bg-transparent text-white placeholder-neutral-400 focus:outline-none text-sm"
+                                placeholder="Buscar">
+                        </div>
+                    </div>
+                    <div id="searchResults" class="max-h-[400px] overflow-y-auto">
+
+                    </div>
+                    <div id="loadingIndicator" class="hidden p-4 text-center text-neutral-400">
+                        <span>Buscando...</span>
+                    </div>
+                </div>
 
             <a href="#" class="flex justify-center w-full px-3 py-3 rounded-lg hover:bg-zinc-800 mt-3">
-                <svg class="sidebar-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0z"/></svg>
+                <img src="{% static 'myapp/img/explorar.png' %}" alt="busqueda" class="w-7 h-7">
                 <span class="hidden">Explorar</span>
             </a>
 
             <a href="#" class="flex justify-center w-full px-3 py-3 rounded-lg hover:bg-zinc-800 mt-3">
-                <svg class="sidebar-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0z"/></svg>
+                <img src="{% static 'myapp/img/reels.png' %}" alt="busqueda" class="w-7 h-7">
                 <span class="hidden">Reels</span>
             </a>
 
             <a href="{% url 'mensajes' %}" class="flex justify-center w-full gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
-                <svg class="sidebar-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12.003 2.001a9.705 9.705 0 110 19.4 10.876 10.876 0 01-2.895-.384.798.798 0 00-.533.04l-1.984.876a.801.801 0 01-1.123-.708l-.054-1.78a.806.806 0 00-.27-.569 9.49 9.49 0 01-3.14-7.175 9.65 9.65 0 0110-9.7z" stroke="currentColor" strokeMiterlimit="10"/></svg>
+                <img src="{% static 'myapp/img/mensajes.png' %}" alt="busqueda" class="w-7 h-7">
                 <span class="hidden">Mensajes</span>
             </a>
 
@@ -59,14 +78,13 @@
                 <span class="hidden">Notificaciones</span>
             </a>
 
-            <div class="w-[72px] relative inline-block text-left">
+            <div class="w-[63px] relative inline-block text-left cursor-pointer mr-4">
             <a onclick="toggleMenu()" class="flex justify-center w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
-                <img src="{% static 'myapp/img/mas.png' %}" alt="crear" class="w-6 h-6 mr-4 justi">
-                <span class="hidden">Crear</span>
+                <img src="{% static 'myapp/img/mas.png' %}" alt="crear" class="w-6 h-6 justified-center">
             </a>
 
-                <div id="dropdownMenu" class="hidden absolute w-full origin-top-right rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <button id="abrirModal" class="flex w-full items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Publicación
+                <div id="dropdownMenu" class="hidden fixed left-1 top-[55%] w-56 rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 z-[9999]">
+                    <button id="abrirModal" class="flex w-full items-center gap-2 px-4 py-3 rounded-md hover:bg-neutral-700">Publicación
                     <img src="{% static 'myapp/img/camara.png' %}" alt="publi" class="w-8 h-8 ml-[45%]">
                     </button>
                     <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
@@ -89,18 +107,17 @@
                 <span class="hidden">Perfil</span>
             </a>
             
-            <a href="https://www.meta.ai/" class="flex justify-center w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[110%]">
+            <a href="https://www.meta.ai/" class="flex justify-center w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[400%]">
             <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6">
             <span class="hidden">Meta AI</span>
             </a>
 
-            <div class="w-[240px] relative inline-block text-left">
+            <div class="w-[63px] relative inline-block text-left mr-4">
                 <button onclick="Menumas()" class="flex justify-center w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
-                <img src="{% static 'myapp/img/menu.png' %}" alt="crear" class="w-6 h-6 mr-4">
-                <span class="hidden">Más</span>
+                <img src="{% static 'myapp/img/menu.png' %}" alt="crear" class="w-6 h-6 justify-center">
                 </button>
 
-                <div id="MasMenu" class="hidden absolute bottom-full w-full origin-top-right rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div id="MasMenu" class="hidden fixed left-1 top-[61%] w-56 rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 z-[9999]">
                     <a href="{% url 'editar_perfil' %}" class="flex w-full items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Configuración
                     <img src="{% static 'myapp/img/confi.png' %}" alt="publi" class="w-7 h-7 ml-[35%]">
                     </a>
@@ -122,9 +139,9 @@
             </div>
         </nav>
 
-    <main class="flex-1 flex h-screen overflow-hidden">
-
-        <div class="w-[350px] border-r border-zinc-800 overflow-y-auto ml-[72px]">
+    <main class="flex-1 flex h-screen overflow-visible">
+        
+        <div class="w-[350px] border-r border-zinc-800 overflow-y-auto ml-[72px] z-[1]">
             <div class="p-4 border-b border-zinc-800 text-xl font-semibold">Mensajes</div>
             <ul>
                 {% for seguido in seguidos %}

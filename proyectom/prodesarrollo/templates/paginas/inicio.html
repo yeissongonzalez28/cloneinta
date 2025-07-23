@@ -30,14 +30,14 @@
                 <span class="logo-font text-5xl text-white hidden xl:inline mx-4">Instapp</span>
             </div>
             
-            <a href="{% url 'inicio' %}" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+            <a href="{% url 'inicio' %}" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                 <svg class="sidebar-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M9.005 16.545a2.997 2.997 0 012.997-2.997h0A2.997 2.997 0 0115 16.545V22h7V11.543L12 2 2 11.543V22h7.005z"/></svg>
                 <span class="hidden xl:inline ml-2">Inicio</span>
             </a>
 
-                <button onclick="toggleSearch()" class="flex w-full gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+                <button onclick="toggleSearch()" class="flex w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                 <img src="{% static 'myapp/img/busqueda.png' %}" alt="busqueda" class="w-7 h-7">
-                    <span class="hidden xl:inline">Buscar</span>
+                    <span class="hidden xl:inline ml-1">Buscar</span>
                 </button>
 
                 <div id="searchPanel" class="hidden absolute left-16 w-96 bg-neutral-800 rounded-xl shadow-xl mt-2 z-50">
@@ -60,35 +60,35 @@
                     </div>
                 </div>
 
-            <a href="#" class="flex w-full gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+            <a href="#" class="flex w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                 <img src="{% static 'myapp/img/explorar.png' %}" alt="busqueda" class="w-7 h-7">
                 <span class="hidden xl:inline ml-1">Explorar</span>
             </a>
 
-            <a href="#" class="flex  w-full gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+            <a href="#" class="flex  w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                 <img src="{% static 'myapp/img/reels.png' %}" alt="busqueda" class="w-7 h-7">
                 <span class="hidden xl:inline ml-1">Reels</span>
             </a>
 
-            <a href="{% url 'mensajes' %}" class="flex w-full gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+            <a href="{% url 'mensajes' %}" class="flex w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                 <img src="{% static 'myapp/img/mensajes.png' %}" alt="busqueda" class="w-7 h-7">
                 <span class="hidden xl:inline ml-1">Mensajes</span>
             </a>
 
-            <a href="#" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+            <a href="#" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                 <svg class="sidebar-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M16.792 3.904A4.989 4.989 0 0121.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 014.708-5.218 4.21 4.21 0 013.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 013.679-1.938m0-2a6.04 6.04 0 00-4.797 2.127 6.052 6.052 0 00-4.787-2.127A6.985 6.985 0 00.5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 003.518 3.018 2 2 0 002.174 0 45.263 45.263 0 003.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 00-6.708-7.218z"/></svg>
-                <span class="hidden xl:inline ml-1">Notificaciones</span>
+                <span class="hidden xl:inline ml-2">Notificaciones</span>
             </a>
             <div class="w-[240px] relative inline-block text-left">
 
-                <button onclick="toggleMenu()" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+                <button onclick="toggleMenu()" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                     <img src="{% static 'myapp/img/mas.png' %}" alt="busqueda" class="w-6 h-6">
-                <span class="hidden xl:inline ml-1">Crear</span>
+                <span class="hidden xl:inline ml-2">Crear</span>
                 </button>
 
 
                 <div id="dropdownMenu" class="hidden absolute w-full origin-top-right rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <button id="abrirModal" class="flex w-full items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Publicación
+                    <button id="abrirModal" class="flex w-[98%] items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Publicación
                     <img src="{% static 'myapp/img/camara.png' %}" alt="publi" class="w-8 h-8 ml-[45%]">
                     </button>
                     <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
@@ -106,20 +106,20 @@
                 </div>
             </div>
 
-            <a href="{% url 'perfil' user.username %}" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+            <a href="{% url 'perfil' user.username %}" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                 <img src="{{ sugerencia.usuario.profile.avatar.url|default:'/media/perfiles/perfil_default.jpg' }}" alt="Perfil" class="w-6 h-6 rounded-full">
-                <span class="hidden xl:inline ml-1">Perfil</span>
+                <span class="hidden xl:inline ml-2">Perfil</span>
             </a>
             
-            <a href="https://www.meta.ai/" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[110%]">
+            <a href="https://www.meta.ai/" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[104.5%]">
             <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6">
-            <span class="hidden xl:inline">Meta AI</span>
+            <span class="hidden xl:inline ml-2">Meta AI</span>
             </a>
 
             <div class="w-[240px] relative inline-block text-left">
-                <button onclick="Menumas()" class="flex w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
-                    <img src="{% static 'myapp/img/mas.png' %}" alt="busqueda" class="w-6 h-6">
-                <span class="hidden xl:inline">Más</span>
+                <button onclick="Menumas()" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+                    <img src="{% static 'myapp/img/menu.png' %}" alt="busqueda" class="w-6 h-6">
+                <span class="hidden xl:inline ml-2">Más</span>
                 </button>
 
                 <div id="MasMenu" class="hidden absolute bottom-full w-full origin-top-right rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
