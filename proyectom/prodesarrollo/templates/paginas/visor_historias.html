@@ -1,0 +1,228 @@
+<div id="visorHistorias" class="hidden fixed inset-0 bg-black z-50">
+    <div class="relative h-full">
+        <!-- Botones de navegación -->
+        <button id="prevHistoria" class="absolute left-4 top-1/2 -translate-y-1/2 text-white p-2 z-10">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <button id="nextHistoria" class="absolute right-4 top-1/2 -translate-y-1/2 text-white p-2 z-10">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+
+        <!-- Cerrar visor -->
+        <button onclick="cerrarVisorHistorias()" class="absolute right-4 top-4 text-white p-2 z-10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+
+        <!-- Barra de progreso múltiple sobre el contenido -->
+        <div id="barrasProgreso" class="absolute top-0 left-0 right-0 flex gap-1 p-2">
+            <!-- Se llenarán dinámicamente -->
+        </div>
+
+        <!-- Barra de progreso -->
+        <div id="historiaProgreso" class="absolute top-0 left-0 right-0 h-1 bg-gray-600">
+            <div class="h-full bg-white" style="width: 0%"></div>
+        </div>
+
+        <!-- Contenedor de la historia -->
+        <div class="flex items-center justify-center h-full">
+            <div id="historiaContenido" class="max-w-[500px] w-full">
+                <!-- Info del autor -->
+                <div class="absolute top-8 left-4 flex items-center gap-3 text-white z-10">
+                    <img id="autorAvatar" class="w-8 h-8 rounded-full" src="" alt="">
+                    <span id="autorUsername" class="font-semibold"></span>
+                    <span id="historiaTimestamp" class="text-sm text-gray-300"></span>
+                </div>
+                
+                <!-- Contenido de la historia -->
+                <img id="historiaImagen" class="hidden max-h-screen w-full object-contain" src="" alt="">
+                <video id="historiaVideo" class="hidden max-h-screen w-full object-contain" controls></video>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let todasLasHistorias = [];  // Historias de todos los usuarios
+let usuarioActual = 0;       // Índice del usuario actual
+let historiaActual = 0;      // Índice de la historia actual del usuario
+let tiempoHistoria = 5000;
+let timerProgreso = null;
+
+function verHistoria(historiaId) {
+    fetch('/obtener_todas_historias/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                todasLasHistorias = data.usuarios;
+                // Encontrar el usuario y la historia inicial
+                for (let i = 0; i < todasLasHistorias.length; i++) {
+                    const historias = todasLasHistorias[i].historias;
+                    const index = historias.findIndex(h => h.id === parseInt(historiaId));
+                    if (index !== -1) {
+                        usuarioActual = i;
+                        historiaActual = index;
+                        break;
+                    }
+                }
+                mostrarHistoriaActual();
+            }
+        });
+}
+
+function mostrarHistoriaActual() {
+    if (!todasLasHistorias.length) return;
+    
+    const usuario = todasLasHistorias[usuarioActual];
+    const historia = usuario.historias[historiaActual];
+    
+    // Actualizar barras de progreso
+    actualizarBarrasProgreso();
+    
+    // Actualizar navegación
+    const esUltimaHistoriaDelUsuario = historiaActual === usuario.historias.length - 1;
+    const esUltimoUsuario = usuarioActual === todasLasHistorias.length - 1;
+    const esPrimeraHistoriaDelUsuario = historiaActual === 0;
+    const esPrimerUsuario = usuarioActual === 0;
+
+    document.getElementById('prevHistoria').style.visibility = 
+        (!esPrimeraHistoriaDelUsuario || !esPrimerUsuario) ? 'visible' : 'hidden';
+    document.getElementById('nextHistoria').style.visibility = 
+        (!esUltimaHistoriaDelUsuario || !esUltimoUsuario) ? 'visible' : 'hidden';
+
+    // Actualizar contenido
+    document.getElementById('autorAvatar').src = usuario.avatar;
+    document.getElementById('autorUsername').textContent = usuario.username;
+    document.getElementById('historiaTimestamp').textContent = historia.timestamp;
+
+    const imagen = document.getElementById('historiaImagen');
+    const video = document.getElementById('historiaVideo');
+
+    if (historia.tipo === 'video') {
+        imagen.classList.add('hidden');
+        video.classList.remove('hidden');
+        video.src = historia.url;
+        video.play();
+        video.onended = siguienteHistoria;
+    } else {
+        video.classList.add('hidden');
+        imagen.classList.remove('hidden');
+        imagen.src = historia.url;
+        iniciarProgreso();
+    }
+
+    document.getElementById('visorHistorias').classList.remove('hidden');
+}
+
+function actualizarBarrasProgreso() {
+    const barrasContainer = document.getElementById('barrasProgreso');
+    barrasContainer.innerHTML = '';
+    
+    const usuario = todasLasHistorias[usuarioActual];
+    usuario.historias.forEach((_, index) => {
+        const barra = document.createElement('div');
+        barra.className = 'flex-1 h-1 bg-gray-600';
+        
+        const progreso = document.createElement('div');
+        progreso.className = 'h-full bg-white transition-all duration-100';
+        
+        if (index < historiaActual) {
+            progreso.style.width = '100%';
+        } else if (index === historiaActual) {
+            progreso.style.width = '0%';
+            progreso.id = 'progresoActual';
+        } else {
+            progreso.style.width = '0%';
+        }
+        
+        barra.appendChild(progreso);
+        barrasContainer.appendChild(barra);
+    });
+}
+
+function iniciarProgreso() {
+    const barra = document.querySelector('#historiaProgreso > div');
+    let progreso = 0;
+    
+    if (timerProgreso) clearInterval(timerProgreso);
+    
+    timerProgreso = setInterval(() => {
+        progreso += 1;
+        barra.style.width = `${progreso}%`;
+        
+        if (progreso >= 100) {
+            clearInterval(timerProgreso);
+            siguienteHistoria();
+        }
+    }, tiempoHistoria / 100);
+}
+
+function siguienteHistoria() {
+    const usuario = todasLasHistorias[usuarioActual];
+    
+    if (historiaActual < usuario.historias.length - 1) {
+        // Siguiente historia del mismo usuario
+        historiaActual++;
+    } else if (usuarioActual < todasLasHistorias.length - 1) {
+        // Primera historia del siguiente usuario
+        usuarioActual++;
+        historiaActual = 0;
+    } else {
+        // No hay más historias
+        cerrarVisorHistorias();
+        return;
+    }
+    
+    mostrarHistoriaActual();
+}
+
+function anteriorHistoria() {
+    if (historiaActual > 0) {
+        // Historia anterior del mismo usuario
+        historiaActual--;
+    } else if (usuarioActual > 0) {
+        // Última historia del usuario anterior
+        usuarioActual--;
+        historiaActual = todasLasHistorias[usuarioActual].historias.length - 1;
+    }
+    
+    mostrarHistoriaActual();
+}
+
+function cerrarVisorHistorias() {
+    const visor = document.getElementById('visorHistorias');
+    const video = document.getElementById('historiaVideo');
+    
+    if (timerProgreso) clearInterval(timerProgreso);
+    video.pause();
+    visor.classList.add('hidden');
+    todasLasHistorias = [];
+    usuarioActual = 0;
+    historiaActual = 0;
+}
+
+// Event Listeners
+document.getElementById('prevHistoria').addEventListener('click', (e) => {
+    e.stopPropagation();
+    anteriorHistoria();
+});
+
+document.getElementById('nextHistoria').addEventListener('click', (e) => {
+    e.stopPropagation();
+    siguienteHistoria();
+});
+
+// Teclas de navegación
+document.addEventListener('keydown', (e) => {
+    if (!document.getElementById('visorHistorias').classList.contains('hidden')) {
+        if (e.key === 'ArrowLeft') anteriorHistoria();
+        else if (e.key === 'ArrowRight') siguienteHistoria();
+        else if (e.key === 'Escape') cerrarVisorHistorias();
+    }
+});
+</script>

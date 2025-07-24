@@ -1,0 +1,152 @@
+<div id="modalHistoria" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-neutral-800 rounded-xl p-6 w-[500px]">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-white">Crear historia</h3>
+            <button onclick="cerrarModalHistoria()" class="text-neutral-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <form id="historiaForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <div class="border-2 border-dashed border-neutral-700 rounded-lg p-8 text-center" 
+                     id="dropZoneHistoria">
+                    {{ historia_form.archivo }}
+                    <div id="previewHistoria" class="hidden">
+                        <img id="previewImage" class="max-h-[400px] mx-auto mb-4 hidden" src="" alt="">
+                        <video id="previewVideo" class="max-h-[400px] mx-auto mb-4 hidden" controls></video>
+                    </div>
+                    <div id="uploadText" class="text-neutral-400">
+                        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p>Arrastra una foto o video aquí</p>
+                        <button type="button" onclick="document.getElementById('historiaInput').click()" 
+                                class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            Seleccionar archivo
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" 
+                        class="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                        id="btnSubirHistoria" 
+                        disabled>
+                    Publicar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let historiaFile = null;
+
+function abrirModalHistoria() {
+    document.getElementById('modalHistoria').classList.remove('hidden');
+}
+
+function cerrarModalHistoria() {
+    document.getElementById('modalHistoria').classList.add('hidden');
+    resetearModalHistoria();
+}
+
+function resetearModalHistoria() {
+    historiaFile = null;
+    document.getElementById('historiaInput').value = '';
+    document.getElementById('previewHistoria').classList.add('hidden');
+    document.getElementById('previewImage').classList.add('hidden');
+    document.getElementById('previewVideo').classList.add('hidden');
+    document.getElementById('uploadText').classList.remove('hidden');
+    document.getElementById('btnSubirHistoria').disabled = true;
+}
+
+// Escuchar cambios en el input de archivo
+document.getElementById('historiaInput').addEventListener('change', function(e) {
+    if (this.files && this.files[0]) {
+        historiaFile = this.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const previewImage = document.getElementById('previewImage');
+            const previewVideo = document.getElementById('previewVideo');
+            const isVideo = historiaFile.type.startsWith('video/');
+            
+            document.getElementById('uploadText').classList.add('hidden');
+            document.getElementById('previewHistoria').classList.remove('hidden');
+            
+            if (isVideo) {
+                previewVideo.src = e.target.result;
+                previewVideo.classList.remove('hidden');
+                previewImage.classList.add('hidden');
+            } else {
+                previewImage.src = e.target.result;
+                previewImage.classList.remove('hidden');
+                previewVideo.classList.add('hidden');
+            }
+            
+            document.getElementById('btnSubirHistoria').disabled = false;
+        };
+        
+        reader.readAsDataURL(historiaFile);
+    }
+});
+
+// Manejar el envío del formulario
+document.getElementById('historiaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!historiaFile) return;
+
+    const formData = new FormData(this);
+    formData.append('archivo', historiaFile);
+
+    fetch('/crear_historia/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            cerrarModalHistoria();
+            // Mostrar la historia inmediatamente
+            verHistoria(data.historia_id);
+        } else {
+            alert(data.error || 'Error al subir la historia');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al subir la historia');
+    });
+});
+
+// Drag and drop
+const dropZone = document.getElementById('dropZoneHistoria');
+
+dropZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('border-blue-500');
+});
+
+dropZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-blue-500');
+});
+
+dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-blue-500');
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        document.getElementById('historiaInput').files = e.dataTransfer.files;
+        document.getElementById('historiaInput').dispatchEvent(new Event('change'));
+    }
+});
+</script>

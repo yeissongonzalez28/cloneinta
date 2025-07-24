@@ -130,8 +130,12 @@ class LoginForm(forms.Form):
 class EditarPerfilForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = ['nombre_completo', 'email', 'telefono', 'descripción', 'edad', 'genero']
+        fields = ['imagen_perfil','nombre_completo', 'email', 'telefono', 'descripción', 'edad', 'genero']
         widgets = {
+            'imagen_perfil': forms.FileInput(attrs={
+                'class': 'w-full text-white border border-zinc-700 rounded-lg px-4 py-2 bg-zinc-900 focus:outline-none focus:border-blue-500',
+                'accept': 'image/*'
+            }),
             'nombre_completo': forms.TextInput(attrs={
                 'class': 'w-full bg-zinc-900 text-white border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500',
                 'placeholder': 'Nombre completo'
@@ -170,3 +174,26 @@ class PublicacionForm(forms.ModelForm):
                 'placeholder': 'Escribe una descripción...'
             }),
         }
+
+class HistoriaForm(forms.ModelForm):
+    archivo = forms.FileField(
+        widget=forms.FileInput(attrs={
+            'class': 'hidden',
+            'accept': 'image/*,video/*',
+            'id': 'historiaInput'
+        })
+    )
+
+    class Meta:
+        model = Historia
+        fields = ['archivo']
+
+    def clean_archivo(self):
+        archivo = self.cleaned_data.get('archivo')
+        if archivo:
+            ext = archivo.name.split('.')[-1].lower()
+            if ext not in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov']:
+                raise forms.ValidationError("Formato de archivo no soportado")
+            if archivo.size > 100 * 1024 * 1024:  # 100MB limit
+                raise forms.ValidationError("El archivo es demasiado grande")
+        return archivo

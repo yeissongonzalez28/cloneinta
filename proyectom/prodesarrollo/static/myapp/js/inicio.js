@@ -139,3 +139,86 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(video);
   });
 });
+
+// --------------------------------busqueda de usuarios--------------------------------
+
+let searchTimeout;
+
+function toggleSearch() {
+    const panel = document.getElementById('searchPanel');
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden')) {
+        document.getElementById('searchInput').focus();
+    }
+}
+
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    clearTimeout(searchTimeout);
+    const query = e.target.value.trim();
+    const resultsDiv = document.getElementById('searchResults');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
+    if (!query) {
+        resultsDiv.innerHTML = '';
+        return;
+    }
+
+    loadingIndicator.classList.remove('hidden');
+
+    searchTimeout = setTimeout(() => {
+        fetch(`/buscar_usuarios/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                loadingIndicator.classList.add('hidden');
+                resultsDiv.innerHTML = '';
+
+                if (data.usuarios.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <div class="px-4 py-3 text-sm text-neutral-400">
+                            No se encontraron usuarios
+                        </div>
+                    `;
+                    return;
+                }
+
+                data.usuarios.forEach(usuario => {
+                    const div = document.createElement('div');
+                    div.className = 'px-4 py-2 hover:bg-neutral-700 cursor-pointer transition-colors';
+                    div.onclick = () => window.location.href = `/perfil/${usuario.username}`;
+                    
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <img src="${usuario.imagen_perfil || '/static/myapp/img/perfil_default.jpg'}"
+                                alt="${usuario.username}"
+                                class="w-11 h-11 rounded-full object-cover">
+                            <div>
+                                <div class="font-semibold text-white">${usuario.username}</div>
+                                <div class="text-sm text-neutral-400">${usuario.nombre_completo}</div>
+                                <div class="text-xs text-neutral-500">${usuario.seguidores} seguidores</div>
+                            </div>
+                        </div>
+                    `;
+                    resultsDiv.appendChild(div);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loadingIndicator.classList.add('hidden');
+                resultsDiv.innerHTML = `
+                    <div class="px-4 py-3 text-sm text-red-400">
+                        Error al buscar usuarios
+                    </div>
+                `;
+            });
+    }, 300);
+});
+
+// Cerrar el panel al hacer clic fuera
+document.addEventListener('click', function(e) {
+    const panel = document.getElementById('searchPanel');
+    const searchButton = document.querySelector('button[onclick="toggleSearch()"]');
+    if (!panel.contains(e.target) && !searchButton.contains(e.target)) {
+        panel.classList.add('hidden');
+    }
+});
+// --------------------------------------------

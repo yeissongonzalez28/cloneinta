@@ -91,10 +91,10 @@
                     <button id="abrirModal" class="flex w-[98%] items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Publicación
                     <img src="{% static 'myapp/img/camara.png' %}" alt="publi" class="w-8 h-8 ml-[45%]">
                     </button>
-                    <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
-                    Historia
-                    <img src="{% static 'myapp/img/historia.png' %}" alt="historia" class="w-6 h-6 ml-[60%]">
-                    </a>
+                    <button onclick="abrirModalHistoria()" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+                        Historia
+                        <img src="{% static 'myapp/img/historia.png' %}" alt="historia" class="w-6 h-6 ml-[60%]">
+                    </button>
                     <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
                     Anuncio
                     <img src="{% static 'myapp/img/anuncio.png' %}" alt="anuncio" class="w-6 h-6 ml-[58%]">
@@ -105,12 +105,14 @@
                     </a>
                 </div>
             </div>
-
             <a href="{% url 'perfil' user.username %}" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
-                <img src="{{ sugerencia.usuario.profile.avatar.url|default:'/media/perfiles/perfil_default.jpg' }}" alt="Perfil" class="w-6 h-6 rounded-full">
+                    {% if user.imagen_perfil %}
+                            <img src="{{ user.imagen_perfil.url }}" alt="Foto de perfil" class="w-6 h-6 object-cover rounded-full">
+                        {% else %}
+                            <img src="{% static 'img/default-profile.png' %}" alt="Sin imagen" class="w-6 h-6 object-cover">
+                    {% endif %}
                 <span class="hidden xl:inline ml-2">Perfil</span>
             </a>
-            
             <a href="https://www.meta.ai/" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[104.5%]">
             <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6">
             <span class="hidden xl:inline ml-2">Meta AI</span>
@@ -146,25 +148,55 @@
 
 
         <main class="flex-1 p-8">
-
-            <div class="max-w-xl mx-auto space-y-6 mt-2">
-
-                <div class="flex flex-col items-center">
-                    <div class="story-ring p-[2px] rounded-full">
-                        <div class="bg-black p-[2px] rounded-full">
-                            <img src="https://via.placeholder.com/56" alt="Historia" class="w-14 h-14 rounded-full">
-                        </div>
+    <div class="max-w-xl mx-auto space-y-6 mt-2">
+        <div class="flex space-x-4 overflow-x-auto pb-4">
+            <!-- Botón de crear historia -->
+            <div class="flex-shrink-0">
+                <button onclick="abrirModalHistoria()" class="flex flex-col items-center">
+                    <div class="relative bg-black rounded-full">
+                        {% if user.imagen_perfil %}
+                            <img src="{{ user.imagen_perfil.url }}" alt="Tu historia" class="w-[64px] h-[64px] rounded-full border-2 border-neutral-700 object-cover">
+                        {% else %}
+                            <img src="{% static 'img/default-profile.png' %}" alt="Tu historia" class="w-[64px] h-[64px] rounded-full border-2 border-neutral-700 object-cover">
+                        {% endif %}
+                        <div class="absolute bottom-0 right-0 bg-blue-500 rounded-full w-6 h-6 flex items-center justify-center text-white text-xl font-bold">+</div>
                     </div>
-                    <span class="text-xs mt-1">usuario1</span>
-                </div>
-
+                    <span class="text-xs mt-1">Tu historia</span>
+                </button>
             </div>
+
+            <!-- Historias activas -->
+            <div id="historias-container" class="flex space-x-4">
+                {% for historia in historias_activas %}
+                    <div class="flex-shrink-0 ">
+                        <button onclick="verHistoria('{{ historia.id }}')" class="flex flex-col items-center">
+                            <div class="story-ring p-[2px] rounded-full {% if historia.vista %}opacity-50{% endif %}">
+                                <div class="bg-black p-[2px] rounded-full">
+                                    {% if historia.autor.imagen_perfil %}
+                                        <img src="{{ historia.autor.imagen_perfil.url }}" alt="{{ historia.autor.username }}" class="w-14 h-14 rounded-full object-cover">
+                                    {% else %}
+                                        <img src="{% static 'img/default-profile.png' %}" alt="{{ historia.autor.username }}" class="w-14 h-14 rounded-full object-cover">
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <span class="text-xs mt-1">{{ historia.autor.username }}</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 
             <div class="max-w-xl mx-auto space-y-6 mt-2">
                 {% for publicacion in publicaciones %}
-
                     <div class="flex items-center gap-3">
-                    
+                            {% if publicacion.autor.imagen_perfil %}
+                                <img src="{{ publicacion.autor.imagen_perfil.url }}" alt="{{ publicacion.autor.username }}" class="w-10 h-10 rounded-full object-cover">
+                            {% else %}
+                                <img src="{% static 'myapp/img/perfil_default.jpg' %}" alt="{{ publicacion.autor.username }}" class="w-10 h-10 rounded-full object-cover">
+                            {% endif %}
+                            <span class="text-white">{{ a.username }}</span>
+
                         <span class="font-semibold">{{ publicacion.autor.username }}</span>
                         {% load customtime %}
                         <p class="text-xs text-gray-500 mt-1">Hace {{ publicacion.fecha_creacion|timesince_con_y }} </p>
@@ -200,7 +232,11 @@
             <div class="space-y-4">
                 {% for sugerencia in usuarios_sugeridos %}
                     <div class="flex items-center gap-4">
-                        <img src="{{ sugerencia.usuario.profile.avatar.url|default:'/media/perfiles/perfil_default.jpg' }}" alt="Avatar" class="w-10 h-10 rounded-full">
+                        {% if sugerencia.imagen_prefil %}
+                            <img src="{{ sugerencia.imagen_perfil.url }}" alt="Avatar" class="w-10 h-10 rounded-full">
+                        {% else %}
+                            <img src="{% static 'myapp/img/perfil_default.jpg' %}" alt="Avatar" class="w-10 h-10 rounded-full">
+                        {% endif %}
                         <div class="text-sm">
                             <p class="font-semibold">{{ sugerencia.usuario.username }}</p>
                             <p class="text-gray-400">{{ sugerencia.usuario.first_name }} {{ sugerencia.usuario.last_name }}</p>
@@ -223,89 +259,10 @@
         </div>
     </div>
     {% include 'paginas/crear_publi.html' %}
+    {% include 'paginas/subir_historia.html' %}
+    {% include 'paginas/visor_historias.html' %}
     
     <script src="{% static 'myapp/js/inicio.js' %}" ></script>
-    <script>
-let searchTimeout;
-
-function toggleSearch() {
-    const panel = document.getElementById('searchPanel');
-    panel.classList.toggle('hidden');
-    if (!panel.classList.contains('hidden')) {
-        document.getElementById('searchInput').focus();
-    }
-}
-
-document.getElementById('searchInput').addEventListener('input', function(e) {
-    clearTimeout(searchTimeout);
-    const query = e.target.value.trim();
-    const resultsDiv = document.getElementById('searchResults');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-
-    if (!query) {
-        resultsDiv.innerHTML = '';
-        return;
-    }
-
-    loadingIndicator.classList.remove('hidden');
-
-    searchTimeout = setTimeout(() => {
-        fetch(`/buscar_usuarios/?q=${encodeURIComponent(query)}`)
-            .then(response => response.json())
-            .then(data => {
-                loadingIndicator.classList.add('hidden');
-                resultsDiv.innerHTML = '';
-
-                if (data.usuarios.length === 0) {
-                    resultsDiv.innerHTML = `
-                        <div class="px-4 py-3 text-sm text-neutral-400">
-                            No se encontraron usuarios
-                        </div>
-                    `;
-                    return;
-                }
-
-                data.usuarios.forEach(usuario => {
-                    const div = document.createElement('div');
-                    div.className = 'px-4 py-2 hover:bg-neutral-700 cursor-pointer transition-colors';
-                    div.onclick = () => window.location.href = `/perfil/${usuario.username}`;
-                    
-                    div.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <img src="${usuario.avatar}" 
-                                 alt="${usuario.username}" 
-                                 class="w-11 h-11 rounded-full object-cover">
-                            <div>
-                                <div class="font-semibold text-white">${usuario.username}</div>
-                                <div class="text-sm text-neutral-400">${usuario.nombre_completo}</div>
-                                <div class="text-xs text-neutral-500">${usuario.seguidores} seguidores</div>
-                            </div>
-                        </div>
-                    `;
-                    resultsDiv.appendChild(div);
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                loadingIndicator.classList.add('hidden');
-                resultsDiv.innerHTML = `
-                    <div class="px-4 py-3 text-sm text-red-400">
-                        Error al buscar usuarios
-                    </div>
-                `;
-            });
-    }, 300);
-});
-
-// Cerrar el panel al hacer clic fuera
-document.addEventListener('click', function(e) {
-    const panel = document.getElementById('searchPanel');
-    const searchButton = document.querySelector('button[onclick="toggleSearch()"]');
-    if (!panel.contains(e.target) && !searchButton.contains(e.target)) {
-        panel.classList.add('hidden');
-    }
-});
-</script>
 </body>
 </html>
 

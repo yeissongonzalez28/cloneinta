@@ -155,3 +155,45 @@ class Comentario(models.Model):
 
     def __str__(self):
         return f"Comentario de {self.autor.username}"
+
+
+class Historia(models.Model):
+    autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='historias')
+    archivo = models.FileField(upload_to='historias/')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    expiracion = models.DateTimeField()
+    vistas = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='historias_vistas', blank=True)
+
+    def es_imagen(self):
+        return self.archivo.name.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp'))
+
+    def es_video(self):
+        return self.archivo.name.lower().endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm'))
+
+    def esta_activa(self):
+        return timezone.now() <= self.expiracion
+
+    @property
+    def ha_expirado(self):
+        return timezone.now() >= self.expiracion
+    
+    def save(self, *args, **kwargs):
+        if not self.expiracion:
+            # Establecer la expiración a 24 horas desde ahora
+            self.expiracion = timezone.now() + timezone.timedelta(hours=24)
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def limpiar_historias_expiradas(cls):
+        # Eliminar historias expiradas y sus archivos
+        historias_expiradas = cls.objects.filter(expiracion__lte=timezone.now())
+        for historia in historias_expiradas:
+            if historia.archivo:
+                try:
+                    historia.archivo.delete()  # Eliminar el archivo físico
+                except Exception as e:
+                    print(f"Error eliminando archivo: {e}")
+        historias_expiradas.delete()  # Eliminar los registros de la base de datos
+
+    class Meta:
+        ordering = ['-fecha_creacion']

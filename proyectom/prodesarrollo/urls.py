@@ -21,4 +21,9 @@ urlpatterns = [
     path('enviar_mensaje/', views.enviar_mensaje, name='enviar_mensaje'),
     path('obtener_mensajes/<str:username>/', views.obtener_mensajes, name='obtener_mensajes'),
     path('buscar_usuarios/', views.buscar_usuarios, name='buscar_usuarios'),
+    path('crear_historia/', views.crear_historia, name='crear_historia'),
+    path('obtener_historias/', views.obtener_historias, name='obtener_historias'),
+    path('obtener_historia/<int:historia_id>/', views.obtener_historia, name='obtener_historia'),
+    path('obtener_historias/<int:historia_id>/usuario/', views.obtener_historias_usuario, name='obtener_historias_usuario'),
+    path('obtener_todas_historias/', views.obtener_todas_historias, name='obtener_todas_historias'),
 ]

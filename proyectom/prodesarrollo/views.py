@@ -13,6 +13,9 @@ from django.utils.crypto import get_random_string
 from .recomendaciones import obtener_usuarios_sugeridos
 from django.contrib.auth import get_user_model
 Usuario = get_user_model()
+from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 # Create your views here.
 
@@ -180,6 +183,22 @@ def obtener_mensajes(request, username):
 # ----------------------------------------
 @login_required
 def inicio(request):
+    # Limpiar historias expiradas primero
+    Historia.limpiar_historias_expiradas()
+    
+    # Obtener historias activas
+    seguidos = Usuario.objects.filter(seguidores_de__seguidor=request.user)
+    historias_activas = Historia.objects.filter(
+        autor__in=[request.user] + list(seguidos),
+        expiracion__gt=timezone.now()
+    ).select_related('autor').order_by('autor', '-fecha_creacion')
+
+    # Agrupar historias por autor y mantener solo la más reciente
+    historias_por_autor = {}
+    for historia in historias_activas:
+        if historia.autor.username not in historias_por_autor:
+            historias_por_autor[historia.autor.username] = historia
+
     form = PublicacionForm()
     publicaciones = Publicacion.objects.select_related('autor').all().order_by('-fecha_creacion')
     usuarios_sugeridos = obtener_usuarios_sugeridos(request.user, limite=5)
@@ -203,9 +222,11 @@ def inicio(request):
         })
 
     contexto = {
-        'form': form,  # 🔥 Esto es lo que te faltaba
+        'form': form,
+        'historia_form': HistoriaForm(),
         'usuarios_sugeridos': usuarios_con_conteo_mutuo,
         'publicaciones': publicaciones,
+        'historias_activas': historias_por_autor.values()  # Añadir historias al contexto
     }
     return render(request, 'paginas/inicio.html', contexto)
 
@@ -294,7 +315,6 @@ def editar_perfil(request):
 
     return render(request, 'paginas/editar_perfil.html', {'form': form})
 
-from django.http import JsonResponse
 # ------------------------------------------------------
 @login_required
 def crear_publicacion(request):
@@ -349,3 +369,161 @@ def buscar_usuarios(request):
         return JsonResponse({'usuarios': resultados})
     
     return JsonResponse({'usuarios': []})
+
+@login_required
+@require_http_methods(["POST"])
+def crear_historia(request):
+    form = HistoriaForm(request.POST, request.FILES)
+    if form.is_valid():
+        try:
+            historia = form.save(commit=False)
+            historia.autor = request.user
+            historia.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'historia_id': historia.id,
+                'url': historia.archivo.url
+            })
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'error': str(e)
+            }, status=500)
+    else:
+        return JsonResponse({
+            'status': 'error',
+            'error': form.errors
+        }, status=400)
+
+@login_required
+def obtener_historias(request):
+    # Primero, limpiar historias expiradas
+    Historia.limpiar_historias_expiradas()
+    
+    # Luego obtener solo historias activas
+    seguidos = Usuario.objects.filter(seguidores_de__seguidor=request.user)
+    historias_activas = Historia.objects.filter(
+        autor__in=[request.user] + list(seguidos),
+        expiracion__gt=timezone.now()
+    ).select_related('autor')
+
+    data = {}
+    for historia in historias_activas:
+        if historia.autor.username not in data:
+            data[historia.autor.username] = {
+                'username': historia.autor.username,
+                'avatar': historia.autor.imagen_perfil.url if historia.autor.imagen_perfil else '/media/perfiles/perfil_default.jpg',
+                'historias': []
+            }
+        data[historia.autor.username]['historias'].append({
+            'id': historia.id,
+            'url': historia.archivo.url,
+            'tipo': 'video' if historia.es_video() else 'imagen',
+            'fecha': historia.fecha_creacion.strftime('%H:%M'),
+            'vista': request.user in historia.vistas.all()
+        })
+
+    return JsonResponse({'usuarios': list(data.values())})
+
+@login_required
+def obtener_historia(request, historia_id):
+    try:
+        historia = Historia.objects.select_related('autor').get(id=historia_id)
+        
+        # Marcar como vista
+        if request.user != historia.autor:
+            historia.vistas.add(request.user)
+        
+        return JsonResponse({
+            'status': 'success',
+            'historia': {
+                'id': historia.id,
+                'url': historia.archivo.url,
+                'tipo': 'video' if historia.es_video() else 'imagen',
+                'autor_username': historia.autor.username,
+                'autor_avatar': historia.autor.imagen_perfil.url if historia.autor.imagen_perfil else '/media/perfiles/perfil_default.jpg',
+                'timestamp': historia.fecha_creacion.strftime('%H:%M')
+            }
+        })
+    except Historia.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Historia no encontrada'
+        }, status=404)
+
+@login_required
+def obtener_historias_usuario(request, historia_id):
+    try:
+        historia = Historia.objects.select_related('autor').get(id=historia_id)
+        historias_usuario = Historia.objects.filter(
+            autor=historia.autor,
+            expiracion__gt=timezone.now()
+        ).order_by('fecha_creacion')
+        
+        historias_data = []
+        for h in historias_usuario:
+            # Marcar como vista si no es el autor
+            if request.user != h.autor:
+                h.vistas.add(request.user)
+            
+            historias_data.append({
+                'id': h.id,
+                'url': h.archivo.url,
+                'tipo': 'video' if h.es_video() else 'imagen',
+                'autor_username': h.autor.username,
+                'autor_avatar': h.autor.imagen_perfil.url if h.autor.imagen_perfil else '/media/perfiles/perfil_default.jpg',
+                'timestamp': h.fecha_creacion.strftime('%H:%M')
+            })
+        
+        return JsonResponse({
+            'status': 'success',
+            'historias': historias_data
+        })
+    except Historia.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Historia no encontrada'
+        }, status=404)
+
+@login_required
+def obtener_todas_historias(request):
+    Historia.limpiar_historias_expiradas()
+    
+    # Obtener usuarios que sigue el usuario actual + el propio usuario
+    seguidos = list(Usuario.objects.filter(
+        seguidores_de__seguidor=request.user
+    ).values_list('username', flat=True))
+    seguidos.append(request.user.username)
+    
+    # Obtener todas las historias activas agrupadas por usuario
+    historias = Historia.objects.filter(
+        autor__username__in=seguidos,
+        expiracion__gt=timezone.now()
+    ).select_related('autor').order_by('autor', 'fecha_creacion')
+    
+    usuarios_historias = {}
+    for historia in historias:
+        if historia.autor.username not in usuarios_historias:
+            usuarios_historias[historia.autor.username] = {
+                'username': historia.autor.username,
+                'avatar': historia.autor.imagen_perfil.url if historia.autor.imagen_perfil else '/media/perfiles/perfil_default.jpg',
+                'historias': []
+            }
+        
+        # Marcar historia como vista si corresponde
+        if request.user != historia.autor:
+            historia.vistas.add(request.user)
+            
+        usuarios_historias[historia.autor.username]['historias'].append({
+            'id': historia.id,
+            'url': historia.archivo.url,
+            'tipo': 'video' if historia.es_video() else 'imagen',
+            'timestamp': historia.fecha_creacion.strftime('%H:%M'),
+            'vista': request.user in historia.vistas.all()
+        })
+    
+    return JsonResponse({
+        'status': 'success',
+        'usuarios': list(usuarios_historias.values())
+    })
