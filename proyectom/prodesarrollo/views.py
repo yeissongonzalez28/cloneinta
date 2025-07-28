@@ -16,6 +16,8 @@ Usuario = get_user_model()
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.db.models import Count
+
 
 # Create your views here.
 
@@ -204,12 +206,17 @@ def inicio(request):
     publicaciones = Publicacion.objects.select_related('autor').all().order_by('-fecha_creacion')
     usuarios_sugeridos = obtener_usuarios_sugeridos(request.user, limite=5)
 
+
     usuarios_con_conteo_mutuo = []
+    siguiendo_usernames = request.user.siguiendo_a.values_list('seguido__username', flat=True)
     for usuario_obj in usuarios_sugeridos:
-        conteo_mutuo = Seguimiento.objects.filter(
-            seguidor__in=request.user.siguiendo_a.values_list('seguido__username', flat=True),
+        seguidores_mutuos_qs = Seguimiento.objects.filter(
+            seguidor__username__in=siguiendo_usernames,
             seguido=usuario_obj
-        ).count()
+        ).select_related('seguidor')
+
+        conteo_mutuo = seguidores_mutuos_qs.count()
+        seguidor_mutuo = seguidores_mutuos_qs.first().seguidor if conteo_mutuo > 0 else None
 
         es_seguido_por_actual = Seguimiento.objects.filter(
             seguidor=request.user,
@@ -219,8 +226,10 @@ def inicio(request):
         usuarios_con_conteo_mutuo.append({
             'usuario': usuario_obj,
             'conteo_seguidores_mutuos': conteo_mutuo,
+            'seguidor_mutuo': seguidor_mutuo,
             'es_seguido_por_actual': es_seguido_por_actual,
         })
+
 
     contexto = {
         'form': form,
@@ -257,32 +266,69 @@ def seguir_usuario(request, nombre_usuario):
 
     return redirect(request.META.get('HTTP_REFERER', 'inicio'))
 
+def obtener_usuarios_sugeridos(usuario_actual, limite=20):
+    # 1. Usernames que el usuario actual sigue
+    siguiendo_usernames = list(
+        Seguimiento.objects.filter(seguidor=usuario_actual)
+        .values_list('seguido__username', flat=True)
+    )
+
+    # 2. Usuarios que son seguidos por los que yo sigo (amigos de amigos)
+    sugerencias_usernames = Seguimiento.objects.filter(
+        seguidor__username__in=siguiendo_usernames
+    ).exclude(
+        seguido__username__in= siguiendo_usernames + [usuario_actual.username]
+    ).values('seguido__username').annotate(
+        num_seguidores=Count('seguido__username')
+    ).order_by('-num_seguidores').values_list('seguido__username', flat=True)
+
+    # 3. Obtener objetos de Usuario
+    sugeridos = Usuario.objects.filter(username__in=sugerencias_usernames)[:limite]
+
+    return sugeridos
+    
+
 
 @login_required
 def ver_todas_sugerencias(request):
     todas_sugerencias = obtener_usuarios_sugeridos(request.user, limite=20)
     usuarios_con_conteo_mutuo = []
-    for usuario_obj in todas_sugerencias:
-        conteo_mutuo = Seguimiento.objects.filter(
-            seguidor__in=request.user.siguiendo_a.values_list('seguido__username', flat=True),
-            seguido=usuario_obj
-        ).count()
+
+    # IDs de usuarios que el usuario actual sigue
+    siguiendo_ids = request.user.siguiendo_a.values_list('seguido_id', flat=True)
+
+    for sugerido in todas_sugerencias:
+        seguidores_mutuos_qs = Seguimiento.objects.filter(
+            seguidor_id__in=siguiendo_ids,
+            seguido=sugerido
+        ).select_related('seguidor')
+
+        conteo_mutuo = seguidores_mutuos_qs.count()
+        seguidor_mutuo = seguidores_mutuos_qs.first().seguidor if conteo_mutuo > 0 else None
+
+        print("Sugerido:", sugerido.username)
+        print("Seguidores mutuos:", [s.seguidor.username for s in seguidores_mutuos_qs])
+        print("Seguidor mutuo seleccionado:", seguidor_mutuo.username if seguidor_mutuo else "Ninguno")
 
         es_seguido_por_actual = Seguimiento.objects.filter(
             seguidor=request.user,
-            seguido=usuario_obj
+            seguido=sugerido
         ).exists()
 
         usuarios_con_conteo_mutuo.append({
-            'usuario': usuario_obj,
+            'usuario': sugerido,
             'conteo_seguidores_mutuos': conteo_mutuo,
+            'seguidor_mutuo': seguidor_mutuo,
             'es_seguido_por_actual': es_seguido_por_actual,
         })
+
+
     contexto = {
         'usuarios_sugeridos': usuarios_con_conteo_mutuo,
         'mostrar_titulo_todos': True
     }
     return render(request, 'myapp/pagina_todas_sugerencias.html', contexto)
+
 
 
 # ---------------------------
@@ -307,6 +353,10 @@ def perfil(request, username):
 def editar_perfil(request):
     if request.method == 'POST':
         form = EditarPerfilForm(request.POST, request.FILES, instance=request.user)
+        print("Archivos recibidos:", request.FILES)
+        print("Formulario válido:", form.is_valid())
+        print("Errores del formulario:", form.errors)
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Perfil actualizado correctamente.')

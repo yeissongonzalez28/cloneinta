@@ -23,7 +23,6 @@ class Usuario(AbstractUser):
 
     email = models.EmailField(
         max_length=254,
-        unique=True,
         blank=True,
         null=True,
     )

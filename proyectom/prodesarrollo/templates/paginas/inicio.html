@@ -107,8 +107,8 @@
                 </div>
             </div>
             <a href="{% url 'perfil' user.username %}" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mt-3 ml-1">
-                        {% if usuario.imagen_perfil %}
-                            <img src="{{ usuario.imagen_perfil.url }}" alt="Foto de perfil" class="w-8 h-8 object-cover rounded-full border-2 border-white-500">
+                        {% if user.imagen_perfil %}
+                            <img src="{{ user.imagen_perfil.url }}" alt="Foto de perfil" class="w-8 h-8 object-cover rounded-full border-2 border-white-500">
                         {% else %}
                             <img src="{% static 'myapp/img/perfil_default.jpg' %}" alt="Sin imagen" class="w-7 h-7 object-cover">
                     {% endif %}
@@ -235,23 +235,23 @@
             <div class="space-y-4">
                 {% for sugerencia in usuarios_sugeridos %}
                     <div class="flex items-center gap-4">
-                        {% if sugerencia.imagen_prefil %}
-                            <img src="{{ sugerencia.imagen_perfil.url }}" alt="Avatar" class="w-10 h-10 rounded-full">
+                        {% if sugerencia.usuario.imagen_perfil %}
+                            <img src="{{ sugerencia.usuario.imagen_perfil.url }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
                         {% else %}
-                            <img src="{% static 'myapp/img/perfil_default.jpg' %}" alt="Avatar" class="w-10 h-10 rounded-full">
+                            <img src="{% static 'myapp/img/perfil_default.jpg' %}" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
                         {% endif %}
                         <div class="text-sm">
                             <p class="font-semibold">{{ sugerencia.usuario.username }}</p>
-                            <p class="text-gray-400">{{ sugerencia.usuario.first_name }} {{ sugerencia.usuario.last_name }}</p>
                             {% if sugerencia.conteo_seguidores_mutuos > 0 %}
                                 <p class="text-xs text-gray-500">
                                     {% if sugerencia.conteo_seguidores_mutuos == 1 %}
-                                        {{ request.user.username }} sigue esta cuenta.
+                                        {{ sugerencia.seguidor_mutuo.username }} sigue a esta cuenta.
                                     {% else %}
-                                        {{ request.user.username }} y {{ sugerencia.conteo_seguidores_mutuos }} más la siguen.
+                                        {{ sugerencia.seguidor_mutuo.username }} y {{ sugerencia.conteo_seguidores_mutuos|add:"-1" }} más siguen esta cuenta.
                                     {% endif %}
                                 </p>
                             {% endif %}
+
                         </div>
                         <a href="{% url 'seguir_usuario' sugerencia.usuario.username %}" class="ml-auto text-blue-500 text-sm">
                             {% if sugerencia.es_seguido_por_actual %}Dejar de seguir{% else %}Seguir{% endif %}

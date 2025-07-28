@@ -68,13 +68,44 @@
 
         <div class="max-w-xl mx-auto p-6 bg-blac rounded-xl shadow">
             <h2 class="text-2xl font-bold mb-4">Editar Perfil</h2>
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                    Guardar cambios
-                </button>
-            </form>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    {{ form.non_field_errors }}
+
+    <label for="{{ form.imagen_perfil.id_for_label }}">Foto de perfil</label>
+    {{ form.imagen_perfil.errors }}
+    {{ form.imagen_perfil }}
+
+    <label for="{{ form.nombre_completo.id_for_label }}">Nombre completo</label>
+    {{ form.nombre_completo.errors }}
+    {{ form.nombre_completo }}
+
+    <label for="{{ form.email.id_for_label }}">Email</label>
+    {{ form.email.errors }}
+    {{ form.email }}
+
+    <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
+    {{ form.telefono.errors }}
+    {{ form.telefono }}
+
+    <label for="{{ form.descripción.id_for_label }}">Descripción</label>
+    {{ form.descripción.errors }}
+    {{ form.descripción }}
+
+    <label for="{{ form.edad.id_for_label }}">Edad</label>
+    {{ form.edad.errors }}
+    {{ form.edad }}
+
+    <label for="{{ form.genero.id_for_label }}">Género</label>
+    {{ form.genero.errors }}
+    {{ form.genero }}
+
+    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+        Guardar cambios
+    </button>
+</form>
+
         </div>
     </div>
 </body>

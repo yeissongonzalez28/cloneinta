@@ -161,6 +161,14 @@ class EditarPerfilForm(forms.ModelForm):
                 'class': 'w-full bg-zinc-900 text-white border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500'
             }),
         }
+    def clean_email(self):  # 👈 MISMA INDENTACIÓN QUE class Meta
+        email = self.cleaned_data.get('email')
+        print("EJECUTANDO clean_email CON:", email)  # 👈 Esto debe salir en consola
+        if email:
+            email = email.strip().lower()
+            if Usuario.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Ya existe un usuario con este email.")
+        return email
 
 # -----------------------------------------------
 class PublicacionForm(forms.ModelForm):
