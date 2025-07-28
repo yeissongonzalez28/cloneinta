@@ -25,22 +25,23 @@
 <body class="bg-black">
 
     <div class="flex">
-        <nav class="fixed h-screen w-[72px] xl:w-[250px] border-r border-zinc-800 px-1 py-1 flex flex-col items-start">
-            <div class="py-4 mb-4 mt-2">
-                <span class="logo-font text-5xl text-white hidden xl:inline mx-4">Instapp</span>
+        <nav class="fixed h-screen w-[72px] xl:w-[250px] border-r border-zinc-800 px-1 py-1 flex flex-col items-start transition-all duration-300" id="mainNav">
+            <div class="py-4 mb-4 mt-2 flex justify-center">
+                <img src="{% static 'myapp/img/instagram.png' %}" alt="instagram" class="w-6 h-6 hidden ml-5" id="logoIcon">
+                <span class="logo-font text-5xl text-white hidden xl:inline mx-4" id="logoText">Instapp</span>
             </div>
             
             <a href="{% url 'inicio' %}" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                 <svg class="sidebar-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M9.005 16.545a2.997 2.997 0 012.997-2.997h0A2.997 2.997 0 0115 16.545V22h7V11.543L12 2 2 11.543V22h7.005z"/></svg>
-                <span class="hidden xl:inline ml-2">Inicio</span>
+                <span class="hidden xl:inline ml-2 font-bold">Inicio</span>
             </a>
 
-                <button onclick="toggleSearch()" class="flex w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+                <button onclick="toggleSearch()" class="flex w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3 focus:font-bold">
                 <img src="{% static 'myapp/img/busqueda.png' %}" alt="busqueda" class="w-7 h-7">
                     <span class="hidden xl:inline ml-1">Buscar</span>
                 </button>
 
-                <div id="searchPanel" class="hidden absolute left-16 w-96 bg-neutral-800 rounded-xl shadow-xl mt-2 z-50">
+                <div id="searchPanel" class="hidden absolute left-16 w-96 bg-neutral-800 rounded-xl shadow-xl mt-2 ml-2 z-50">
                     <div class="p-4">
                         <div class="flex items-center gap-3 pb-3 border-b border-neutral-700">
                             <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +66,7 @@
                 <span class="hidden xl:inline ml-1">Explorar</span>
             </a>
 
-            <a href="#" class="flex  w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+            <a href="{% url 'reels' %}" class="flex  w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                 <img src="{% static 'myapp/img/reels.png' %}" alt="busqueda" class="w-7 h-7">
                 <span class="hidden xl:inline ml-1">Reels</span>
             </a>
@@ -105,45 +106,47 @@
                     </a>
                 </div>
             </div>
-            <a href="{% url 'perfil' user.username %}" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
-                    {% if user.imagen_perfil %}
-                            <img src="{{ user.imagen_perfil.url }}" alt="Foto de perfil" class="w-6 h-6 object-cover rounded-full">
+            <a href="{% url 'perfil' user.username %}" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mt-3 ml-1">
+                        {% if usuario.imagen_perfil %}
+                            <img src="{{ usuario.imagen_perfil.url }}" alt="Foto de perfil" class="w-8 h-8 object-cover rounded-full border-2 border-white-500">
                         {% else %}
-                            <img src="{% static 'img/default-profile.png' %}" alt="Sin imagen" class="w-6 h-6 object-cover">
+                            <img src="{% static 'myapp/img/perfil_default.jpg' %}" alt="Sin imagen" class="w-7 h-7 object-cover">
                     {% endif %}
-                <span class="hidden xl:inline ml-2">Perfil</span>
-            </a>
-            <a href="https://www.meta.ai/" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[104.5%]">
-            <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6">
-            <span class="hidden xl:inline ml-2">Meta AI</span>
+                <span class="hidden xl:inline ml-1">Perfil</span>
             </a>
 
-            <div class="w-[240px] relative inline-block text-left">
-                <button onclick="Menumas()" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
-                    <img src="{% static 'myapp/img/menu.png' %}" alt="busqueda" class="w-6 h-6">
-                <span class="hidden xl:inline ml-2">Más</span>
-                </button>
+            <div class="fixed bottom-0 pb-4">
+    <a href="https://www.meta.ai/" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2">
+        <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6">
+        <span class="hidden xl:inline ml-2">Meta AI</span>
+    </a>
 
-                <div id="MasMenu" class="hidden absolute bottom-full w-full origin-top-right rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <a href="{% url 'editar_perfil' %}" class="flex w-full items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Configuración
-                    <img src="{% static 'myapp/img/confi.png' %}" alt="publi" class="w-7 h-7 ml-[35%]">
-                    </a>
-                    <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-neutral-700 mb-2">
-                    Cambiar apariencia
-                    <img src="{% static 'myapp/img/apariencia.png' %}" alt="historia" class="w-7 h-7 ml-[48%]">
-                    </a>
-                    <div class="border-t-4 border-b-2 border-neutral-700 mb-2 py-2">
-                        <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
-                        Cambiar cuenta
-                        <img src="{% static 'myapp/img/cambiar.png' %}" alt="anuncio" class="w-6 h-6 ml-[30%] rounded-full">
-                        </a>
-                    </div>
-                    <a href="{% url 'cerrarse' %}" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
-                    Salir
-                    <img src="{% static 'myapp/img/salir.png' %}" alt="ai" class="w-7 h-7 ml-[67%]">
-                    </a>
-                </div>
+    <div class="w-[240px] relative inline-block text-left">
+        <button onclick="Menumas()" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+            <img src="{% static 'myapp/img/menu.png' %}" alt="busqueda" class="w-6 h-6">
+            <span class="hidden xl:inline ml-2">Más</span>
+        </button>
+        
+        <div id="MasMenu" class="hidden absolute bottom-full w-full origin-bottom-left rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none mb-2">
+            <a href="{% url 'editar_perfil' %}" class="flex w-full items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Configuración
+            <img src="{% static 'myapp/img/confi.png' %}" alt="publi" class="w-7 h-7 ml-[35%]">
+            </a>
+            <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-neutral-700 mb-2">
+            Cambiar apariencia
+            <img src="{% static 'myapp/img/apariencia.png' %}" alt="historia" class="w-7 h-7 ml-[48%]">
+            </a>
+            <div class="border-t-4 border-b-2 border-neutral-700 mb-2 py-2">
+                <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+                Cambiar cuenta
+                <img src="{% static 'myapp/img/cambiar.png' %}" alt="anuncio" class="w-6 h-6 ml-[30%] rounded-full">
+                </a>
             </div>
+            <a href="{% url 'cerrarse' %}" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+            Salir
+            <img src="{% static 'myapp/img/salir.png' %}" alt="ai" class="w-7 h-7 ml-[67%]">
+            </a>
+        </div>
+    </div>
         </nav>
 
 

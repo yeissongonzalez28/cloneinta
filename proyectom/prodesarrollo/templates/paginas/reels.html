@@ -23,10 +23,12 @@
     </style>
 </head>
 <body class="bg-black">
+
     <div class="flex">
-                <nav class="fixed h-screen w-[72px] xl:w-[250px] border-r border-zinc-800 px-1 py-1 flex flex-col items-start">
-            <div class="py-4 mb-4 mt-2">
-                <span class="logo-font text-5xl text-white hidden xl:inline mx-4">Instapp</span>
+        <nav class="fixed h-screen w-[72px] xl:w-[250px] border-r border-zinc-800 px-1 py-1 flex flex-col items-start transition-all duration-300" id="mainNav">
+            <div class="py-4 mb-4 mt-2 flex justify-center">
+                <img src="{% static 'myapp/img/instagram.png' %}" alt="instagram" class="w-6 h-6 hidden ml-5" id="logoIcon">
+                <span class="logo-font text-5xl text-white hidden xl:inline mx-4" id="logoText">Instapp</span>
             </div>
             
             <a href="{% url 'inicio' %}" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
@@ -34,12 +36,12 @@
                 <span class="hidden xl:inline ml-2">Inicio</span>
             </a>
 
-                <button onclick="toggleSearch()" class="flex w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+                <button onclick="toggleSearch()" class="flex w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3 focus:font-bold">
                 <img src="{% static 'myapp/img/busqueda.png' %}" alt="busqueda" class="w-7 h-7">
                     <span class="hidden xl:inline ml-1">Buscar</span>
                 </button>
 
-                <div id="searchPanel" class="hidden absolute left-16 w-96 bg-neutral-800 rounded-xl shadow-xl mt-2 z-50">
+                <div id="searchPanel" class="hidden absolute left-16 w-96 bg-neutral-800 rounded-xl shadow-xl mt-2 ml-2 z-50">
                     <div class="p-4">
                         <div class="flex items-center gap-3 pb-3 border-b border-neutral-700">
                             <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +68,7 @@
 
             <a href="#" class="flex  w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
                 <img src="{% static 'myapp/img/reels.png' %}" alt="busqueda" class="w-7 h-7">
-                <span class="hidden xl:inline ml-1">Reels</span>
+                <span class="hidden xl:inline ml-1 font-bold">Reels</span>
             </a>
 
             <a href="{% url 'mensajes' %}" class="flex w-[98%] gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
@@ -90,10 +92,10 @@
                     <button id="abrirModal" class="flex w-[98%] items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Publicación
                     <img src="{% static 'myapp/img/camara.png' %}" alt="publi" class="w-8 h-8 ml-[45%]">
                     </button>
-                    <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
-                    Historia
-                    <img src="{% static 'myapp/img/historia.png' %}" alt="historia" class="w-6 h-6 ml-[60%]">
-                    </a>
+                    <button onclick="abrirModalHistoria()" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+                        Historia
+                        <img src="{% static 'myapp/img/historia.png' %}" alt="historia" class="w-6 h-6 ml-[60%]">
+                    </button>
                     <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
                     Anuncio
                     <img src="{% static 'myapp/img/anuncio.png' %}" alt="anuncio" class="w-6 h-6 ml-[58%]">
@@ -104,8 +106,7 @@
                     </a>
                 </div>
             </div>
-
-            <a href="{% url 'perfil' user.username %}" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mt-3 font-bold ml-1">
+            <a href="{% url 'perfil' user.username %}" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mt-3 ml-1">
                         {% if user.imagen_perfil %}
                             <img src="{{ user.imagen_perfil.url }}" alt="Foto de perfil" class="w-8 h-8 object-cover rounded-full border-2 border-white-500">
                         {% else %}
@@ -113,85 +114,52 @@
                     {% endif %}
                 <span class="hidden xl:inline ml-1">Perfil</span>
             </a>
-            
-            <a href="https://www.meta.ai/" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[104.5%]">
-            <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6">
-            <span class="hidden xl:inline ml-2">Meta AI</span>
+
+            <div class="fixed bottom-0 pb-4">
+    <a href="https://www.meta.ai/" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2">
+        <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6">
+        <span class="hidden xl:inline ml-2">Meta AI</span>
+    </a>
+
+    <div class="w-[240px] relative inline-block text-left">
+        <button onclick="Menumas()" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
+            <img src="{% static 'myapp/img/menu.png' %}" alt="busqueda" class="w-6 h-6">
+            <span class="hidden xl:inline ml-2">Más</span>
+        </button>
+
+        <div id="MasMenu" class="hidden absolute bottom-full w-full origin-bottom-left rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none mb-2">
+            <a href="{% url 'editar_perfil' %}" class="flex w-full items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Configuración
+            <img src="{% static 'myapp/img/confi.png' %}" alt="publi" class="w-7 h-7 ml-[35%]">
             </a>
-
-            <div class="w-[240px] relative inline-block text-left">
-                <button onclick="Menumas()" class="flex w-[98%] items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
-                    <img src="{% static 'myapp/img/menu.png' %}" alt="busqueda" class="w-6 h-6">
-                <span class="hidden xl:inline ml-2">Más</span>
-                </button>
-
-                <div id="MasMenu" class="hidden absolute bottom-full w-full origin-top-right rounded-md bg-neutral-800 text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <a href="{% url 'editar_perfil' %}" class="flex w-full items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">Configuración
-                    <img src="{% static 'myapp/img/confi.png' %}" alt="publi" class="w-7 h-7 ml-[35%]">
-                    </a>
-                    <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-neutral-700 mb-2">
-                    Cambiar apariencia
-                    <img src="{% static 'myapp/img/apariencia.png' %}" alt="historia" class="w-7 h-7 ml-[48%]">
-                    </a>
-                    <div class="border-t-4 border-b-2 border-neutral-700 mb-2 py-2">
-                        <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
-                        Cambiar cuenta
-                        <img src="{% static 'myapp/img/cambiar.png' %}" alt="anuncio" class="w-6 h-6 ml-[30%] rounded-full">
-                        </a>
-                    </div>
-                    <a href="{% url 'cerrarse' %}" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
-                    Salir
-                    <img src="{% static 'myapp/img/salir.png' %}" alt="ai" class="w-7 h-7 ml-[67%]">
-                    </a>
-                </div>
+            <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-neutral-700 mb-2">
+            Cambiar apariencia
+            <img src="{% static 'myapp/img/apariencia.png' %}" alt="historia" class="w-7 h-7 ml-[48%]">
+            </a>
+            <div class="border-t-4 border-b-2 border-neutral-700 mb-2 py-2">
+                <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+                Cambiar cuenta
+                <img src="{% static 'myapp/img/cambiar.png' %}" alt="anuncio" class="w-6 h-6 ml-[30%] rounded-full">
+                </a>
             </div>
-        </nav>
-        
-    <div class="max-w-4xl mx-auto p-6">
-        <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <!-- Foto de perfil -->
-            <div class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-gray-300">
-                {% if user.imagen_perfil %}
-                            <img src="{{ user.imagen_perfil.url }}" alt="Foto de perfil" class="w-full h-full object-cover">
-                        {% else %}
-                            <img src="{% static 'img/default-profile.png' %}" alt="Sin imagen" class="w-full h-full object-cover">
-                    {% endif %}
-            </div>
-
-            <!-- Información del usuario -->
-            <div class="flex-1 space-y-4">
-            <div class="flex flex-col md:flex-row items-center gap-4">
-                <h1 class="text-2xl font-light lowercase">{{ user.username }}</h1>
-                <div class="flex gap-2">
-                <a href="{% url 'editar_perfil' %}" class="bg-gray-500 px-4 py-1 rounded text-sm font-medium">Editar perfil</a>
-                <button class="bg-gray-500 px-4 py-1 rounded text-sm font-medium">Ver archivo</button>
-                </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="flex gap-8 text-sm">
-                <div><span class="font-semibold">{{ request.user.publicaciones.count }}</span> publicaciones</div>
-                <div><span class="font-semibold">{{ follower_count }}</span> seguidores</div>
-                <div><span class="font-semibold">{{ following_count }}</span> seguidos</div>
-            </div>
-
-            <!-- Bio -->
-            <div class="text-sm leading-snug">
-                <p>{{ user.nombre_completo }}<br></p><br>
-                <p>{{ user.descripción }}</p>
-                {% if user.link %}
-                <a href="{{ user.link }}" target="_blank" class="text-blue-500 hover:underline">{{ user.link }}</a>
-                {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Línea divisoria -->
-        <div class="border-t mt-8 pt-4 text-center text-gray-500 text-sm">
-            Aquí puedes añadir una galería, historias destacadas, o tabs como "Publicaciones", "Reels", etc.
+            <a href="{% url 'cerrarse' %}" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+            Salir
+            <img src="{% static 'myapp/img/salir.png' %}" alt="ai" class="w-7 h-7 ml-[67%]">
+            </a>
         </div>
     </div>
+        </nav>
 
-</div>
+
+        <main class="flex-1 p-8">
+
+        </main>
+
+    </div>
+    {% include 'paginas/crear_publi.html' %}
+    {% include 'paginas/subir_historia.html' %}
+    {% include 'paginas/visor_historias.html' %}
+    
+    <script src="{% static 'myapp/js/inicio.js' %}" ></script>
 </body>
 </html>
+

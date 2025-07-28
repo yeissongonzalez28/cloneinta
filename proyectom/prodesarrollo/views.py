@@ -158,7 +158,8 @@ def enviar_mensaje(request):
         return JsonResponse({
             'estado': 'ok',
             'mensaje': mensaje.contenido,
-            'fecha': mensaje.fecha_envio.strftime('%H:%M')
+            'fecha': mensaje.fecha_envio.strftime('%H:%M'),
+            'enviar': request.user.username  # Añadir el nombre del emisor
         })
     return JsonResponse({'estado': 'error'})
 
@@ -527,3 +528,7 @@ def obtener_todas_historias(request):
         'status': 'success',
         'usuarios': list(usuarios_historias.values())
     })
+
+@login_required
+def reels(request):
+    return render(request,'paginas/reels.html')

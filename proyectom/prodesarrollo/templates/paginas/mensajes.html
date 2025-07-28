@@ -103,11 +103,15 @@
             </div>
 
             <a href="{% url 'perfil' user.username %}" class="flex justify-center w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-3">
-                <img src="{{ sugerencia.usuario.profile.avatar.url|default:'/media/perfiles/perfil_default.jpg' }}" alt="Perfil" class="w-6 h-6 rounded-full justify-center">
+                    {% if user.imagen_perfil %}
+                            <img src="{{ user.imagen_perfil.url }}" alt="Foto de perfil" class="w-7 h-7 object-cover rounded-full">
+                        {% else %}
+                            <img src="{% static 'img/perfil_default.jpg' %}" alt="Sin imagen" class="w-7 h-7 object-cover">
+                    {% endif %}
                 <span class="hidden">Perfil</span>
             </a>
             
-            <a href="https://www.meta.ai/" class="flex justify-center w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[400%]">
+            <a href="https://www.meta.ai/" class="flex justify-center w-full items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-800 mx-2 mt-[407%]">
             <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6">
             <span class="hidden">Meta AI</span>
             </a>
@@ -147,7 +151,11 @@
                 {% for seguido in seguidos %}
                 <li class="hover:bg-zinc-800 cursor-pointer px-4 py-3 flex items-center gap-3">
                     <a href="{% url 'chat' seguido.username %}" class="flex items-center gap-3">
-                        
+                        {% if seguido.imagen_perfil %}
+                            <img src="{{ seguido.imagen_perfil.url }}" alt="Foto de perfil" class="w-10 h-10 object-cover rounded-full">
+                        {% else %}
+                            <img src="{% static 'myapp/img/perfil_default.jpg' %}" alt="Sin imagen" class="w-10 h-10 object-cover rounded-full">
+                        {% endif %}
                         <div>
                             <div class="font-semibold text-white">{{ seguido.username }}</div>
                             <div class="text-zinc-400 text-sm">Enviar mensaje</div>
@@ -164,19 +172,23 @@
             {% if receptor %}
             <h2 class="text-lg font-bold">Chat con {{ receptor.username }}</h2>
 
-            <div id="chat-box" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+            <div id="chat-box" class="h-[calc(100vh-200px)] overflow-y-auto px-4 py-2 space-y-4">
                 {% for mensaje in mensajes %}
-                <div>
-                    <strong>{{ mensaje.enviar.username }}:</strong> {{ mensaje.contenido }}
+                <div class="flex flex-col {% if mensaje.enviar == request.user %}items-end{% else %}items-start{% endif %}">
+                    <div class="{% if mensaje.enviar == request.user %}bg-blue-500 text-white{% else %}bg-zinc-800 text-white{% endif %} rounded-2xl px-4 py-2 max-w-[80%]">
+                        {{ mensaje.contenido }}
+                    </div>
                 </div>
                 {% endfor %}
             </div>
 
-            <form id="chat-form">
+            <form id="chat-form" class="flex gap-2 p-4 border-t border-zinc-800">
                 {% csrf_token %}
                 <input type="hidden" id="receptor" value="{{ receptor.username }}">
-                <input type="text" id="mensaje" placeholder="Escribe un mensaje..." required>
-                <button type="submit">Enviar</button>
+                <input type="text" id="mensaje"
+                    class="flex-1 bg-zinc-800 text-white rounded-full px-4 py-2 focus:outline-none" 
+                    placeholder="Escribe un mensaje...">
+                <button type="submit" class="text-blue-500 font-semibold px-4">Enviar</button>
             </form>
             {% else %}
             <p>Selecciona un usuario para comenzar a chatear.</p>
@@ -209,7 +221,13 @@
         .then(response => response.json())
         .then(data => {
             if (data.estado === 'ok') {
-                chatBox.innerHTML += `<div><strong>${data.emisor}:</strong> ${data.mensaje}</div>`;
+                const mensaje = `
+                    <div class="flex flex-col items-end">
+                        <div class="bg-blue-500 text-white rounded-2xl px-4 py-2 max-w-[80%]">
+                            ${data.mensaje}
+                        </div>
+                    </div>`;
+                chatBox.insertAdjacentHTML('beforeend', mensaje);
                 mensajeInput.value = '';
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
@@ -224,7 +242,14 @@
             .then(data => {
                 chatBox.innerHTML = '';
                 data.mensajes.forEach(msg => {
-                    chatBox.innerHTML += `<div><strong>${msg.emisor}:</strong> ${msg.contenido}</div>`;
+                    const isCurrentUser = msg.enviar === '{{ request.user.username }}';
+                    const mensaje = `
+                        <div class="flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}">
+                            <div class="${isCurrentUser ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-white'} rounded-2xl px-4 py-2 max-w-[80%]">
+                                ${msg.contenido}
+                            </div>
+                        </div>`;
+                    chatBox.innerHTML += mensaje;
                 });
                 chatBox.scrollTop = chatBox.scrollHeight;
             });

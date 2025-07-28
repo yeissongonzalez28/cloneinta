@@ -69,18 +69,6 @@ TEMPLATES = [
     },
 ]
 
-ASGI_APPLICATION = 'proyectom.asgi.application'
-ASGI_APPLICATION = 'proyectom.routing.application'
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("localhost", 6379)],
-        },
-    },
-}
-WSGI_APPLICATION = 'proyectom.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

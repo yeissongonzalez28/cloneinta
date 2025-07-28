@@ -25,8 +25,8 @@
         </div>
 
         <!-- Barra de progreso -->
-        <div id="historiaProgreso" class="absolute top-0 left-0 right-0 h-1 bg-gray-600">
-            <div class="h-full bg-white" style="width: 0%"></div>
+        <div id="historiaProgreso">
+            <div style="width: 0%"></div>
         </div>
 
         <!-- Contenedor de la historia -->
@@ -34,14 +34,14 @@
             <div id="historiaContenido" class="max-w-[500px] w-full">
                 <!-- Info del autor -->
                 <div class="absolute top-8 left-4 flex items-center gap-3 text-white z-10">
-                    <img id="autorAvatar" class="w-8 h-8 rounded-full" src="" alt="">
+                    <img id="autorAvatar" class="w-10 h-[43px] rounded-full object-cover" src="" alt="">
                     <span id="autorUsername" class="font-semibold"></span>
                     <span id="historiaTimestamp" class="text-sm text-gray-300"></span>
                 </div>
                 
                 <!-- Contenido de la historia -->
                 <img id="historiaImagen" class="hidden max-h-screen w-full object-contain" src="" alt="">
-                <video id="historiaVideo" class="hidden max-h-screen w-full object-contain" controls></video>
+                <video id="historiaVideo" class="hidden max-h-screen w-full object-contain"></video>
             </div>
         </div>
     </div>
@@ -51,8 +51,14 @@
 let todasLasHistorias = [];  // Historias de todos los usuarios
 let usuarioActual = 0;       // Índice del usuario actual
 let historiaActual = 0;      // Índice de la historia actual del usuario
-let tiempoHistoria = 5000;
+const TIEMPO_FOTO = 5000; // 5 segundos para fotos
+const TIEMPO_MAX_VIDEO = 60000; // 1 minuto máximo para videos
 let timerProgreso = null;
+
+// Agregar estas variables globales al inicio
+let tiempoInicioPausa = 0;
+let tiempoTranscurridoAntesParar = 0;
+let estaPausado = false;
 
 function verHistoria(historiaId) {
     fetch('/obtener_todas_historias/')
@@ -76,10 +82,25 @@ function verHistoria(historiaId) {
 }
 
 function mostrarHistoriaActual() {
+    tiempoInicioPausa = 0;
+    tiempoTranscurridoAntesParar = 0;
+    estaPausado = false;
+
     if (!todasLasHistorias.length) return;
     
     const usuario = todasLasHistorias[usuarioActual];
     const historia = usuario.historias[historiaActual];
+    
+    // Detener cualquier reproducción anterior
+    const videoAnterior = document.getElementById('historiaVideo');
+    if (videoAnterior) {
+        videoAnterior.pause();
+        videoAnterior.currentTime = 0;
+        videoAnterior.src = '';
+    }
+    
+    // Detener cualquier temporizador existente
+    if (timerProgreso) clearInterval(timerProgreso);
     
     // Actualizar barras de progreso
     actualizarBarrasProgreso();
@@ -107,13 +128,21 @@ function mostrarHistoriaActual() {
         imagen.classList.add('hidden');
         video.classList.remove('hidden');
         video.src = historia.url;
-        video.play();
+        
+        // Configurar video
+        video.onloadedmetadata = function() {
+            // Limitar duración a 1 minuto
+            const duracion = Math.min(video.duration * 1000, TIEMPO_MAX_VIDEO);
+            iniciarProgreso(duracion);
+            video.play();
+        };
+        
         video.onended = siguienteHistoria;
     } else {
         video.classList.add('hidden');
         imagen.classList.remove('hidden');
         imagen.src = historia.url;
-        iniciarProgreso();
+        iniciarProgreso(TIEMPO_FOTO);
     }
 
     document.getElementById('visorHistorias').classList.remove('hidden');
@@ -145,21 +174,45 @@ function actualizarBarrasProgreso() {
     });
 }
 
-function iniciarProgreso() {
+function iniciarProgreso(duracionTotal) {
     const barra = document.querySelector('#historiaProgreso > div');
-    let progreso = 0;
+    const barraActual = document.querySelector('#progresoActual');
+    let tiempoInicio = Date.now() - tiempoTranscurridoAntesParar;
     
     if (timerProgreso) clearInterval(timerProgreso);
     
-    timerProgreso = setInterval(() => {
-        progreso += 1;
-        barra.style.width = `${progreso}%`;
-        
-        if (progreso >= 100) {
-            clearInterval(timerProgreso);
-            siguienteHistoria();
+    if (!estaPausado) {
+        timerProgreso = setInterval(() => {
+            const tiempoTranscurrido = Date.now() - tiempoInicio;
+            const porcentaje = Math.min((tiempoTranscurrido / duracionTotal) * 100, 100);
+            
+            barra.style.width = `${porcentaje}%`;
+            if (barraActual) barraActual.style.width = `${porcentaje}%`;
+            
+            if (porcentaje >= 100) {
+                clearInterval(timerProgreso);
+                siguienteHistoria();
+            }
+        }, 16);
+    }
+}
+
+function pausarProgreso() {
+    if (timerProgreso) {
+        clearInterval(timerProgreso);
+        tiempoInicioPausa = Date.now();
+        estaPausado = true;
+    }
+}
+
+function reanudarProgreso(duracionTotal) {
+    if (estaPausado) {
+        estaPausado = false;
+        if (tiempoInicioPausa > 0) {
+            tiempoTranscurridoAntesParar += Date.now() - tiempoInicioPausa;
         }
-    }, tiempoHistoria / 100);
+        iniciarProgreso(duracionTotal);
+    }
 }
 
 function siguienteHistoria() {
@@ -199,11 +252,19 @@ function cerrarVisorHistorias() {
     const video = document.getElementById('historiaVideo');
     
     if (timerProgreso) clearInterval(timerProgreso);
-    video.pause();
+    if (video) {
+        video.pause();
+        video.currentTime = 0;
+        video.src = '';
+    }
+    
     visor.classList.add('hidden');
     todasLasHistorias = [];
     usuarioActual = 0;
     historiaActual = 0;
+    tiempoInicioPausa = 0;
+    tiempoTranscurridoAntesParar = 0;
+    estaPausado = false;
 }
 
 // Event Listeners
@@ -223,6 +284,20 @@ document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') anteriorHistoria();
         else if (e.key === 'ArrowRight') siguienteHistoria();
         else if (e.key === 'Escape') cerrarVisorHistorias();
+    }
+});
+
+// Agregar manejo de pausa/reproducción al hacer clic
+document.getElementById('visorHistorias').addEventListener('click', function(e) {
+    const video = document.getElementById('historiaVideo');
+    if (!video.classList.contains('hidden')) {
+        if (video.paused) {
+            video.play();
+            reanudarProgreso(Math.min(video.duration * 1000, TIEMPO_MAX_VIDEO));
+        } else {
+            video.pause();
+            pausarProgreso();
+        }
     }
 });
 </script>

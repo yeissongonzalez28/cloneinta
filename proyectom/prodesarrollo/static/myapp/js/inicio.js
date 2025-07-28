@@ -221,4 +221,84 @@ document.addEventListener('click', function(e) {
         panel.classList.add('hidden');
     }
 });
-// --------------------------------------------
+// ----------------------ocultar nav----------------------
+
+function toggleSearch() {
+    const searchPanel = document.getElementById('searchPanel');
+    const mainNav = document.getElementById('mainNav');
+    const searchInput = document.getElementById('searchInput');
+    const navTexts = document.querySelectorAll('nav span:not(.logo-font)');
+    const logoText = document.getElementById('logoText');
+    const logoIcon = document.getElementById('logoIcon');
+    const inicioLink = document.querySelector('a[href="/inicio"]'); // Seleccionar el enlace de inicio
+
+    if (searchPanel.classList.contains('hidden')) {
+        // Mostrar panel de búsqueda y colapsar nav
+        searchPanel.classList.remove('hidden');
+        mainNav.classList.remove('xl:w-[250px]');
+        mainNav.classList.add('w-[72px]');
+        
+        // Ajustar solo el módulo de inicio
+        inicioLink.style.marginTop = '2.2rem'; // mt-14 equivalente
+        
+        // Ocultar textos y cambiar logo
+        navTexts.forEach(text => {
+            text.style.display = 'none';
+        });
+        logoText.style.display = 'none';
+        logoIcon.style.display = 'block';
+        setTimeout(() => searchInput.focus(), 100);
+    } else {
+        // Ocultar panel de búsqueda y expandir nav
+        searchPanel.classList.add('hidden');
+        if (window.innerWidth >= 1280) {
+            mainNav.classList.add('xl:w-[250px]');
+            mainNav.classList.remove('w-[72px]');
+            
+            // Restaurar margin del módulo de inicio
+            inicioLink.style.marginTop = 'mt-3'; // mt-3 original
+            
+            // Mostrar textos y cambiar logo
+            navTexts.forEach(text => {
+                text.style.display = '';
+            });
+            logoText.style.display = '';
+            logoIcon.style.display = 'none';
+        }
+    }
+}
+
+// Actualizar el listener de click fuera
+document.addEventListener('click', function(e) {
+    const searchPanel = document.getElementById('searchPanel');
+    const mainNav = document.getElementById('mainNav');
+    const searchButton = document.querySelector('[onclick="toggleSearch()"]');
+    const navTexts = document.querySelectorAll('nav span:not(.logo-font)');
+    const logoText = document.getElementById('logoText');
+    const logoIcon = document.getElementById('logoIcon');
+    const inicioLink = document.querySelector('a[href="/inicio"]');
+    
+    if (!searchPanel.contains(e.target) && !searchButton.contains(e.target)) {
+        // Ocultar panel de búsqueda
+        searchPanel.classList.add('hidden');
+        
+        // Restaurar el nav a su estado original
+        mainNav.classList.add('xl:w-[250px]');
+        mainNav.classList.remove('w-[72px]');
+        
+        // Restaurar margin del módulo de inicio
+        inicioLink.style.marginTop = '0.75rem';
+        
+        // Mostrar todos los textos
+        navTexts.forEach(text => {
+            text.style.display = '';
+        });
+        
+        // Cambiar el logo
+        logoText.style.display = '';
+        logoIcon.style.display = 'none';
+    }
+});
+
+
+// ----------------------------------------------------------
