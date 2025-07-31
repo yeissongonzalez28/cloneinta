@@ -364,14 +364,13 @@ def editar_perfil(request):
 def crear_publicacion(request):
     if request.method == 'POST':
         form = PublicacionForm(request.POST)
-        archivos = request.FILES.getlist('archivos')  # 'archivos' debe coincidir con el name del input file
+        archivos = request.FILES.getlist('archivos')
 
-        # Validación manual
         extensiones_validas = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mkv']
         for archivo in archivos:
             ext = archivo.name.split('.')[-1].lower()
             if ext not in extensiones_validas:
-                form.add_error(None, f"El archivo '{archivo.name}' no es una extensión válida.")
+                form.add_error(None, f"El archivo '{archivo.name}' no es válido.")
             if archivo.size > 1024 * 1024 * 1024:
                 form.add_error(None, f"El archivo '{archivo.name}' supera el límite de 1 GB.")
 
@@ -380,17 +379,23 @@ def crear_publicacion(request):
             publicacion.autor = request.user
             publicacion.save()
 
-            for archivo in archivos:
-                ArchivoPublicacion.objects.create(publicacion=publicacion, archivo=archivo)
+            aspect_ratio = request.POST.get('aspect_ratio', '4:5')
 
-            return redirect('inicio')  # Cambia esto según tu ruta
+            for archivo in archivos:
+                ArchivoPublicacion.objects.create(
+                    publicacion=publicacion,
+                    archivo=archivo,
+                    aspect_ratio=aspect_ratio
+                )
+
+            return redirect('inicio')
 
     else:
         form = PublicacionForm()
 
     publicaciones = Publicacion.objects.prefetch_related('archivos').all()
-
     return render(request, 'paginas/inicio.html', {'form': form, 'publicaciones': publicaciones})
+
 
 def buscar_usuarios(request):
     query = request.GET.get('q', '')

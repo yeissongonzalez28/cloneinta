@@ -3,19 +3,20 @@
   <div class="bg-neutral-800 p-6 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
     <form id="publicacionForm" method="POST" enctype="multipart/form-data" action="{% url 'crear_publicacion' %}">
       {% csrf_token %}
+      
+      <!-- Input hidden para guardar el aspect ratio -->
+      <input type="hidden" name="aspect_ratio" id="aspect_ratio" value="4:5">
 
       <h2 class="text-3xl text-center text-white mb-6" style="font-family: 'Grand Hotel', cursive;">Crear publicación</h2>
 
-      <!-- Selector de archivos estilo dropzone -->
+      <!-- DropZone -->
       <div id="dropZonePublicacion" 
            class="border-2 border-dashed border-neutral-700 rounded-lg p-8 text-center cursor-pointer mb-4">
-        
-        <!-- Input real oculto -->
-        <input type="file" name="archivos" id="file-upload" multiple accept="image/*,video/*" class="hidden">
+        <input type="file" name="archivos" id="file-upload" accept="image/*,video/*" class="hidden">
 
-        <!-- Vista previa -->
+        <!-- Preview -->
         <div id="previewPublicacion" class="hidden">
-          <div id="preview-container" class="grid grid-cols-3 gap-2 mb-4"></div>
+          <div id="preview-container" class="grid grid-cols-1 gap-2 mb-4"></div>
         </div>
 
         <!-- Texto cuando no hay archivos -->
@@ -43,5 +44,34 @@
         <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Publicar</button>
       </div>
     </form>
+  </div>
+</div>
+
+
+<!-- Modal Recorte -->
+<div id="modalRecorte" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+  <div class="bg-neutral-800 p-4 rounded-xl shadow-xl w-full max-w-3xl relative">
+    <div class="relative w-full max-h-[70vh] overflow-hidden">
+      <img id="imagenRecorte" class="mx-auto max-w-full">
+      
+      <!-- Marco de recorte -->
+      <div id="selectorRecorte">
+        <span class="handle top-left"></span>
+        <span class="handle top-right"></span>
+        <span class="handle bottom-left"></span>
+        <span class="handle bottom-right"></span>
+      </div>
+    </div>
+
+    <!-- Botones para seleccionar proporción -->
+    <div class="flex justify-center gap-4 mt-3">
+      <button id="btnAspect45" class="bg-blue-600 text-white px-3 py-1 rounded">4:5</button>
+      <button id="btnAspect169" class="bg-gray-600 text-white px-3 py-1 rounded">16:9</button>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-3">
+      <button id="cancelarRecorte" class="bg-red-600 text-white px-4 py-2 rounded">Cancelar</button>
+      <button id="btnRecortar" class="bg-green-600 text-white px-4 py-2 rounded">Recortar</button>
+    </div>
   </div>
 </div>

@@ -360,3 +360,214 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
+
+
+
+// ------------------------recortedepublicacion-------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inputFile = document.getElementById('file-upload');
+  const modalRecorte = document.getElementById('modalRecorte');
+  const imagenRecorte = document.getElementById('imagenRecorte');
+  const selector = document.getElementById('selectorRecorte');
+  const btnRecortar = document.getElementById('btnRecortar');
+  const cancelarRecorte = document.getElementById('cancelarRecorte');
+
+  const btnAspect45 = document.getElementById('btnAspect45');
+  const btnAspect169 = document.getElementById('btnAspect169');
+  const aspectInput = document.getElementById('aspect_ratio');
+
+  const preview = document.getElementById('previewPublicacion');
+  const previewContainer = document.getElementById('preview-container');
+  const uploadText = document.getElementById('uploadTextPublicacion');
+
+  let img = new Image();
+  let fileOriginal;
+  let isDragging = false, isResizing = false;
+  let startX, startY, startW, startH, activeHandle;
+
+  // proporción por defecto
+  let currentAspect = 4 / 5;  
+
+  // Al seleccionar la imagen
+  inputFile.addEventListener('change', (e) => {
+    fileOriginal = e.target.files[0];
+    if (fileOriginal && fileOriginal.type.startsWith('image/')) {
+      img.src = URL.createObjectURL(fileOriginal);
+      imagenRecorte.src = img.src;
+      modalRecorte.classList.remove('hidden');
+
+      // Ajustar el selector al tamaño de la imagen completa en miniatura
+      imagenRecorte.onload = () => inicializarMarco();
+    }
+  });
+
+  // Inicializar marco de recorte
+  function inicializarMarco() {
+    const imgRect = imagenRecorte.getBoundingClientRect();
+    const cont = imagenRecorte.parentElement;
+
+    let ancho = imgRect.width * 0.8;
+    let alto = ancho / currentAspect;
+
+    // Si el alto excede la imagen visible, ajustamos
+    if (alto > imgRect.height) {
+      alto = imgRect.height * 0.8;
+      ancho = alto * currentAspect;
+    }
+
+    selector.style.width = `${ancho}px`;
+    selector.style.height = `${alto}px`;
+
+    const offsetLeft = imgRect.left - cont.getBoundingClientRect().left;
+    const offsetTop = imgRect.top - cont.getBoundingClientRect().top;
+
+    selector.style.left = `${offsetLeft + (imgRect.width - ancho) / 2}px`;
+    selector.style.top = `${offsetTop + (imgRect.height - alto) / 2}px`;
+  }
+
+  // Botones para cambiar proporción
+  btnAspect45.addEventListener('click', (e) => {
+    e.preventDefault();
+    currentAspect = 4 / 5;
+    aspectInput.value = '4:5'; // actualiza input hidden
+    btnAspect45.classList.replace('bg-gray-600', 'bg-blue-600');
+    btnAspect169.classList.replace('bg-blue-600', 'bg-gray-600');
+    inicializarMarco();
+  });
+
+  btnAspect169.addEventListener('click', (e) => {
+    e.preventDefault();
+    currentAspect = 16 / 9;
+    aspectInput.value = '16:9'; // actualiza input hidden
+    btnAspect169.classList.replace('bg-gray-600', 'bg-blue-600');
+    btnAspect45.classList.replace('bg-blue-600', 'bg-gray-600');
+    inicializarMarco();
+  });
+
+  // --- Mover o redimensionar selector ---
+  selector.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('handle')) {
+      isResizing = true;
+      activeHandle = e.target;
+      startX = e.clientX;
+      startY = e.clientY;
+      startW = selector.offsetWidth;
+      startH = selector.offsetHeight;
+    } else {
+      isDragging = true;
+      startX = e.clientX - selector.offsetLeft;
+      startY = e.clientY - selector.offsetTop;
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    isResizing = false;
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    const cont = imagenRecorte.parentElement;
+
+    if (isDragging) {
+      let x = e.clientX - startX;
+      let y = e.clientY - startY;
+
+      // Limitar dentro del contenedor
+      x = Math.max(0, Math.min(x, cont.clientWidth - selector.clientWidth));
+      y = Math.max(0, Math.min(y, cont.clientHeight - selector.clientHeight));
+
+      selector.style.left = `${x}px`;
+      selector.style.top = `${y}px`;
+    }
+
+    if (isResizing) {
+      let diffX = e.clientX - startX;
+      let newW = startW + diffX;
+      let newH = newW / currentAspect; // mantener proporción
+
+      // Limitar tamaño mínimo
+      if (newW < 50) {
+        newW = 50;
+        newH = newW / currentAspect;
+      }
+
+      // Limitar que no salga del contenedor
+      if (newW > cont.clientWidth) {
+        newW = cont.clientWidth;
+        newH = newW / currentAspect;
+      }
+      if (newH > cont.clientHeight) {
+        newH = cont.clientHeight;
+        newW = newH * currentAspect;
+      }
+
+      selector.style.width = `${newW}px`;
+      selector.style.height = `${newH}px`;
+    }
+  });
+
+  // --- Recortar ---
+  btnRecortar.addEventListener('click', () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const imgRect = imagenRecorte.getBoundingClientRect();
+    const selRect = selector.getBoundingClientRect();
+
+    // Coordenadas relativas
+    const sx = (selRect.left - imgRect.left) * (img.width / imgRect.width);
+    const sy = (selRect.top - imgRect.top) * (img.height / imgRect.height);
+    const sw = selRect.width * (img.width / imgRect.width);
+    const sh = selRect.height * (img.height / imgRect.height);
+
+    // Resolución final según la proporción
+    let outW = 1080;
+    let outH = Math.round(outW / currentAspect);
+
+    canvas.width = outW;
+    canvas.height = outH;
+
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
+
+    const dataURL = canvas.toDataURL('image/jpeg');
+    canvas.toBlob((blob) => {
+      const fileRecortado = new File([blob], fileOriginal.name, { type: 'image/jpeg' });
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(fileRecortado);
+      inputFile.files = dataTransfer.files;
+
+      // Preview final
+      previewContainer.innerHTML = `
+        <div class="w-full h-full">
+          <img src="${dataURL}" class="w-full h-full object-cover rounded-lg">
+        </div>`;
+      uploadText.classList.add('hidden');
+      preview.classList.remove('hidden');
+
+      modalRecorte.classList.add('hidden');
+    });
+  });
+
+  cancelarRecorte.addEventListener('click', () => {
+    modalRecorte.classList.add('hidden');
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const modalPublicacion = document.getElementById('modalPublicacion');
+  const cancelarModalPublicacion = document.getElementById('cancelarModalPublicacion');
+
+  cancelarModalPublicacion.addEventListener('click', () => {
+    modalPublicacion.classList.add('hidden');
+
+    // Limpia la vista previa
+    document.getElementById('file-upload').value = '';
+    document.getElementById('preview-container').innerHTML = '';
+    document.getElementById('previewPublicacion').classList.add('hidden');
+    document.getElementById('uploadTextPublicacion').classList.remove('hidden');
+  });
+
+});

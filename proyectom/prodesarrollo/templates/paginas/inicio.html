@@ -206,23 +206,38 @@
                         <p class="text-xs text-gray-500 mt-1">Hace {{ publicacion.fecha_creacion|timesince_con_y }} </p>
                     </div>
 
-                    <div class="relative overflow-hidden rounded-md bg-zinc-900 shadow-md w-[500px] h-[700px]" id="carousel-{{ forloop.counter }}">
-                            {% for archivo in publicacion.archivos.all %}
-                                <div class="bg-zinc-900 rounded-lg shadow-md overflow-hidden w-[500px] h-[700px]">
-                                    {% if archivo.es_imagen %}
-                                        <img src="{{ archivo.archivo.url }}" alt="Imagen" class="w-full h-full object-cover">
-                                    {% elif archivo.es_video %}
-                                    <div class="video-container bg-zinc-900 rounded-lg shadow-md overflow-hidden w-[500px] h-[700px]">
-                                        <video class="video-player w-full h-full object-cover" src="{{ archivo.archivo.url }}"muted loop playsinline></video>
-                                            <div class="controls">
+                    <div id="carousel-{{ forloop.counter }}" class="relative overflow-hidden rounded-md bg-zinc-900 shadow-md w-[500px]">
+                        {% for archivo in publicacion.archivos.all %}
+                            <div class="bg-zinc-900 rounded-lg shadow-md overflow-hidden w-full
+                                {% if archivo.aspect_ratio == '4:5' %}
+                                    aspect-[4/5]
+                                {% else %}
+                                    aspect-[16/9]
+                                {% endif %}">
+                                
+                                {% if archivo.es_imagen %}
+                                    <img src="{{ archivo.archivo.url }}" alt="Imagen" class="w-full h-full object-cover">
+                                {% elif archivo.es_video %}
+                                    <div class="video-container bg-zinc-900 rounded-lg shadow-md overflow-hidden w-full
+                                        {% if archivo.aspect_ratio == '4:5' %}
+                                            aspect-[4/5]
+                                        {% else %}
+                                            aspect-[16/9]
+                                        {% endif %}">
+                                        
+                                        <video class="video-player w-full h-full object-cover" src="{{ archivo.archivo.url }}" muted loop playsinline></video>
+                                        
+                                        <div class="controls">
                                             <button class="mute-toggle">🔇</button>
                                             <input type="range" class="seek-bar" value="0">
-                                            </div>
+                                        </div>
                                     </div>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+
                     <div class="text-sm text-gray-300">
                         <p class="mt-2">{{ publicacion.descripcion }}</p>
                         <p class="text-xs text-gray-500 mt-1">{{ publicacion.fecha_creacion|date:"d M Y H:i" }}</p>
@@ -271,83 +286,7 @@
             <!-- Aquí se cargará el formulario -->
         </div>
     </div>
-    <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const dropZone = document.getElementById('dropZonePublicacion');
-  const inputFile = document.getElementById('file-upload');
-  const uploadText = document.getElementById('uploadTextPublicacion');
-  const preview = document.getElementById('previewPublicacion');
-  const previewContainer = document.getElementById('preview-container');
-  const cancelarModal = document.getElementById('cancelarModalPublicacion');
-  const modal = document.getElementById('modalPublicacion');
 
-  // Abrir modal (si tienes botón)
-  document.getElementById('abrirPublicacion')?.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-  });
-
-  cancelarModal.addEventListener('click', () => {
-    modal.classList.add('hidden');
-    resetPreview();
-  });
-
-  // Mostrar vista previa al seleccionar archivo
-  inputFile.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
-
-    if (files.length > 0) {
-      // Limpiar vista previa
-      previewContainer.innerHTML = '';
-      uploadText.classList.add('hidden');
-      preview.classList.remove('hidden');
-
-      files.forEach(file => {
-        const url = URL.createObjectURL(file);
-
-        let elementoPreview;
-        if (file.type.startsWith('video/')) {
-          elementoPreview = `<video src="${url}" class="w-full h-full object-cover rounded-lg" autoplay loop muted></video>`;
-        } else {
-          elementoPreview = `<img src="${url}" class="w-full h-full object-cover rounded-lg">`;
-        }
-
-        // Hacer que ocupe todo el dropzone
-        previewContainer.innerHTML = `
-          <div class="w-full h-full">${elementoPreview}</div>
-        `;
-      });
-    } else {
-      resetPreview();
-    }
-  });
-
-  // Drag & Drop
-  dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('border-blue-500');
-  });
-
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('border-blue-500');
-  });
-
-  dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('border-blue-500');
-    inputFile.files = e.dataTransfer.files;
-    inputFile.dispatchEvent(new Event('change'));
-  });
-
-  // Función para resetear el preview
-  function resetPreview() {
-    preview.classList.add('hidden');
-    uploadText.classList.remove('hidden');
-    previewContainer.innerHTML = '';
-    inputFile.value = '';
-  }
-});
-
-    </script>
     <script src="{% static 'myapp/js/inicio.js' %}" ></script>
 </body>
 </html>

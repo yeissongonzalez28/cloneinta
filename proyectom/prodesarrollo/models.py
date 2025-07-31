@@ -132,6 +132,7 @@ class Publicacion(models.Model):
 class ArchivoPublicacion(models.Model):
     publicacion = models.ForeignKey(Publicacion, related_name='archivos', on_delete=models.CASCADE)
     archivo = models.FileField(upload_to='publicaciones/')
+    aspect_ratio = models.CharField(max_length=10, choices=(('4:5', '4:5'), ('16:9', '16:9')), default='4:5')
 
     def es_imagen(self):
         return self.archivo.name.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp'))
