@@ -328,17 +328,25 @@ def ver_todas_sugerencias(request):
 
 @login_required
 def perfil(request, username):
-    usuario = get_object_or_404(Usuario, username=username)
+    usuario = get_object_or_404(Usuario, username=username)  # usuario del perfil
+    publicaciones = usuario.publicaciones.all()
+    reels = usuario.reels.all()
 
-    publicacion_count = usuario.publicaciones.count()
-    follower_count = Seguimiento.objects.filter(seguido=usuario).count()
-    following_count = Seguimiento.objects.filter(seguidor=usuario).count()
+    es_propio_perfil = request.user == usuario
+
+    ya_sigo = False
+    if request.user.is_authenticated and not es_propio_perfil:
+        ya_sigo = Seguimiento.objects.filter(seguidor=request.user, seguido=usuario).exists()
 
     context = {
-        'user': usuario,
-        'publicaciones': publicacion_count,
-        'follower_count': follower_count,
-        'following_count': following_count,
+        'usuario': usuario,
+        'publicaciones': publicaciones,
+        'reels': reels,
+        'es_propio_perfil': es_propio_perfil,
+        'ya_sigo': ya_sigo,
+        'publicacion_count': publicaciones.count(),
+        'follower_count': Seguimiento.objects.filter(seguido=usuario).count(),
+        'following_count': Seguimiento.objects.filter(seguidor=usuario).count(),
     }
     return render(request, 'paginas/perfil.html', context)
 

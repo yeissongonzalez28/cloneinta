@@ -188,7 +188,7 @@ document.getElementById('searchInput').addEventListener('input', function(e) {
                     
                     div.innerHTML = `
                         <div class="flex items-center gap-3">
-                            <img src="${usuario.imagen_perfil || '/static/myapp/img/perfil_default.jpg'}"
+                            <img src="${usuario.avatar}"
                                 alt="${usuario.username}"
                                 class="w-11 h-11 rounded-full object-cover">
                             <div>
@@ -366,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ------------------------recortedepublicacion-------------------------------------------
-
 document.addEventListener('DOMContentLoaded', () => {
   const inputFile = document.getElementById('file-upload');
   const modalRecorte = document.getElementById('modalRecorte');
@@ -386,21 +385,36 @@ document.addEventListener('DOMContentLoaded', () => {
   let img = new Image();
   let fileOriginal;
   let isDragging = false, isResizing = false;
-  let startX, startY, startW, startH, activeHandle;
+  let startX, startY, startW, startH;
 
   // proporción por defecto
-  let currentAspect = 4 / 5;  
+  let currentAspect = 4 / 5;
 
-  // Al seleccionar la imagen
+  // Al seleccionar el archivo
   inputFile.addEventListener('change', (e) => {
     fileOriginal = e.target.files[0];
-    if (fileOriginal && fileOriginal.type.startsWith('image/')) {
-      img.src = URL.createObjectURL(fileOriginal);
-      imagenRecorte.src = img.src;
-      modalRecorte.classList.remove('hidden');
 
-      // Ajustar el selector al tamaño de la imagen completa en miniatura
-      imagenRecorte.onload = () => inicializarMarco();
+    if (fileOriginal) {
+      // Si es imagen → abrir modal de recorte
+      if (fileOriginal.type.startsWith('image/')) {
+        img.src = URL.createObjectURL(fileOriginal);
+        imagenRecorte.src = img.src;
+        modalRecorte.classList.remove('hidden');
+
+        imagenRecorte.onload = () => inicializarMarco();
+      }
+
+      // Si es video → no recortamos, solo mostramos en preview
+      else if (fileOriginal.type.startsWith('video/')) {
+        const url = URL.createObjectURL(fileOriginal);
+
+        previewContainer.innerHTML = `
+          <div class="w-full h-full">
+            <video src="${url}" class="w-full h-full object-cover rounded-lg" autoplay loop muted playsinline></video>
+          </div>`;
+        uploadText.classList.add('hidden');
+        preview.classList.remove('hidden');
+      }
     }
   });
 
@@ -412,7 +426,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let ancho = imgRect.width * 0.8;
     let alto = ancho / currentAspect;
 
-    // Si el alto excede la imagen visible, ajustamos
     if (alto > imgRect.height) {
       alto = imgRect.height * 0.8;
       ancho = alto * currentAspect;
@@ -428,11 +441,11 @@ document.addEventListener('DOMContentLoaded', () => {
     selector.style.top = `${offsetTop + (imgRect.height - alto) / 2}px`;
   }
 
-  // Botones para cambiar proporción
+  // Botones de proporción
   btnAspect45.addEventListener('click', (e) => {
     e.preventDefault();
     currentAspect = 4 / 5;
-    aspectInput.value = '4:5'; // actualiza input hidden
+    aspectInput.value = '4:5';
     btnAspect45.classList.replace('bg-gray-600', 'bg-blue-600');
     btnAspect169.classList.replace('bg-blue-600', 'bg-gray-600');
     inicializarMarco();
@@ -441,17 +454,16 @@ document.addEventListener('DOMContentLoaded', () => {
   btnAspect169.addEventListener('click', (e) => {
     e.preventDefault();
     currentAspect = 16 / 9;
-    aspectInput.value = '16:9'; // actualiza input hidden
+    aspectInput.value = '16:9';
     btnAspect169.classList.replace('bg-gray-600', 'bg-blue-600');
     btnAspect45.classList.replace('bg-blue-600', 'bg-gray-600');
     inicializarMarco();
   });
 
-  // --- Mover o redimensionar selector ---
+  // Mover y redimensionar
   selector.addEventListener('mousedown', (e) => {
     if (e.target.classList.contains('handle')) {
       isResizing = true;
-      activeHandle = e.target;
       startX = e.clientX;
       startY = e.clientY;
       startW = selector.offsetWidth;
@@ -475,7 +487,6 @@ document.addEventListener('DOMContentLoaded', () => {
       let x = e.clientX - startX;
       let y = e.clientY - startY;
 
-      // Limitar dentro del contenedor
       x = Math.max(0, Math.min(x, cont.clientWidth - selector.clientWidth));
       y = Math.max(0, Math.min(y, cont.clientHeight - selector.clientHeight));
 
@@ -486,15 +497,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isResizing) {
       let diffX = e.clientX - startX;
       let newW = startW + diffX;
-      let newH = newW / currentAspect; // mantener proporción
+      let newH = newW / currentAspect;
 
-      // Limitar tamaño mínimo
       if (newW < 50) {
         newW = 50;
         newH = newW / currentAspect;
       }
 
-      // Limitar que no salga del contenedor
       if (newW > cont.clientWidth) {
         newW = cont.clientWidth;
         newH = newW / currentAspect;
@@ -509,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- Recortar ---
+  // Recortar imagen
   btnRecortar.addEventListener('click', () => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -517,13 +526,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const imgRect = imagenRecorte.getBoundingClientRect();
     const selRect = selector.getBoundingClientRect();
 
-    // Coordenadas relativas
     const sx = (selRect.left - imgRect.left) * (img.width / imgRect.width);
     const sy = (selRect.top - imgRect.top) * (img.height / imgRect.height);
     const sw = selRect.width * (img.width / imgRect.width);
     const sh = selRect.height * (img.height / imgRect.height);
 
-    // Resolución final según la proporción
     let outW = 1080;
     let outH = Math.round(outW / currentAspect);
 
@@ -539,7 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
       dataTransfer.items.add(fileRecortado);
       inputFile.files = dataTransfer.files;
 
-      // Preview final
+      // Mostrar preview final
       previewContainer.innerHTML = `
         <div class="w-full h-full">
           <img src="${dataURL}" class="w-full h-full object-cover rounded-lg">
@@ -554,20 +561,18 @@ document.addEventListener('DOMContentLoaded', () => {
   cancelarRecorte.addEventListener('click', () => {
     modalRecorte.classList.add('hidden');
   });
-});
 
-document.addEventListener('DOMContentLoaded', () => {
+  // Cancelar modal de publicación
   const modalPublicacion = document.getElementById('modalPublicacion');
   const cancelarModalPublicacion = document.getElementById('cancelarModalPublicacion');
 
   cancelarModalPublicacion.addEventListener('click', () => {
     modalPublicacion.classList.add('hidden');
 
-    // Limpia la vista previa
-    document.getElementById('file-upload').value = '';
-    document.getElementById('preview-container').innerHTML = '';
-    document.getElementById('previewPublicacion').classList.add('hidden');
-    document.getElementById('uploadTextPublicacion').classList.remove('hidden');
+    // Limpia vista previa y file input
+    inputFile.value = '';
+    previewContainer.innerHTML = '';
+    preview.classList.add('hidden');
+    uploadText.classList.remove('hidden');
   });
-
 });

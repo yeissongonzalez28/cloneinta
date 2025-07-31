@@ -136,7 +136,7 @@
             <img src="{% static 'myapp/img/apariencia.png' %}" alt="historia" class="w-7 h-7 ml-[48%]">
             </a>
             <div class="border-t-4 border-b-2 border-neutral-700 mb-2 py-2">
-                <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+                <a href="{% url 'index' %}" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
                 Cambiar cuenta
                 <img src="{% static 'myapp/img/cambiar.png' %}" alt="anuncio" class="w-6 h-6 ml-[30%] rounded-full">
                 </a>
@@ -151,37 +151,43 @@
         
     <div class="max-w-4xl mx-auto p-6">
         <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <!-- Foto de perfil -->
             <div class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-gray-300">
-                {% if user.imagen_perfil %}
-                            <img src="{{ user.imagen_perfil.url }}" alt="Foto de perfil" class="w-full h-full object-cover">
-                        {% else %}
-                            <img src="{% static 'img/default-profile.png' %}" alt="Sin imagen" class="w-full h-full object-cover">
-                    {% endif %}
+                {% if usuario.imagen_perfil %}
+                    <img src="{{ usuario.imagen_perfil.url }}" alt="Foto de perfil" class="w-full h-full object-cover">
+                {% else %}
+                    <img src="{% static 'img/default-profile.png' %}" alt="Sin imagen" class="w-full h-full object-cover">
+                {% endif %}
             </div>
 
-            <!-- Información del usuario -->
             <div class="flex-1 space-y-4">
             <div class="flex flex-col md:flex-row items-center gap-4">
-                <h1 class="text-2xl font-light lowercase">{{ user.username }}</h1>
+                <h1 class="text-2xl font-light lowercase">{{ usuario.username }}</h1>
                 <div class="flex gap-2">
-                <a href="{% url 'editar_perfil' %}" class="bg-gray-500 px-4 py-1 rounded text-sm font-medium">Editar perfil</a>
-                <button class="bg-gray-500 px-4 py-1 rounded text-sm font-medium">Ver archivo</button>
+                {% if es_propio_perfil %}
+                    <a href="{% url 'editar_perfil' %}" class="bg-gray-500 px-4 py-1 rounded text-sm font-medium">Editar perfil</a>
+                {% else %}
+                    <form method="post" action="{% url 'seguir_usuario' usuario.username %}">
+                        {% csrf_token %}
+                        <button type="submit" class="px-4 py-1 rounded bg-blue-500 text-white font-semibold">
+                            {% if ya_sigo %} Dejar de seguir {% else %} Seguir {% endif %}
+                        </button>
+                    </form>
+                {% endif %}
                 </div>
             </div>
 
             <!-- Stats -->
             <div class="flex gap-8 text-sm">
-                <div><span class="font-semibold">{{ request.user.publicaciones.count }}</span> publicaciones</div>
+                <div><span class="font-semibold">{{ publicaciones.count }}</span> publicaciones</div>
                 <div><span class="font-semibold">{{ follower_count }}</span> seguidores</div>
                 <div><span class="font-semibold">{{ following_count }}</span> seguidos</div>
             </div>
 
             <!-- Bio -->
             <div class="text-sm leading-snug">
-                <p>{{ user.nombre_completo }}<br></p><br>
-                <p>{{ user.descripción }}</p>
-                {% if user.link %}
+                <p>{{ usuario.nombre_completo }}<br></p><br>
+                <p>{{ usuario.descripción }}</p>
+                {% if usuario.link %}
                 <a href="{{ user.link }}" target="_blank" class="text-blue-500 hover:underline">{{ user.link }}</a>
                 {% endif %}
                 </div>
@@ -190,7 +196,7 @@
 
         <!-- Línea divisoria -->
         <div class="border-t mt-8 pt-4 text-center text-gray-500 text-sm">
-            Aquí puedes añadir una galería, historias destacadas, o tabs como "Publicaciones", "Reels", etc.
+            agrega Aquí un tabs con "Publicaciones", "Reels"
         </div>
     </div>
 </div>
