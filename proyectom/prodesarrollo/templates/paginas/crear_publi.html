@@ -1,21 +1,36 @@
 <!-- Modal Crear Publicación -->
 <div id="modalPublicacion" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
   <div class="bg-neutral-800 p-6 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-    <form method="POST" enctype="multipart/form-data" action="{% url 'crear_publicacion' %}">
+    <form id="publicacionForm" method="POST" enctype="multipart/form-data" action="{% url 'crear_publicacion' %}">
       {% csrf_token %}
 
       <h2 class="text-3xl text-center text-white mb-6" style="font-family: 'Grand Hotel', cursive;">Crear publicación</h2>
 
-      <!-- Selector de archivos -->
-      <div class="mb-4">
+      <!-- Selector de archivos estilo dropzone -->
+      <div id="dropZonePublicacion" 
+           class="border-2 border-dashed border-neutral-700 rounded-lg p-8 text-center cursor-pointer mb-4">
+        
+        <!-- Input real oculto -->
         <input type="file" name="archivos" id="file-upload" multiple accept="image/*,video/*" class="hidden">
-        <label for="file-upload" class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md">
-          + Agregar archivo
-        </label>
-      </div>
 
-      <!-- Vista previa -->
-      <div id="preview-container" class="grid grid-cols-3 gap-2 mb-4"></div>
+        <!-- Vista previa -->
+        <div id="previewPublicacion" class="hidden">
+          <div id="preview-container" class="grid grid-cols-3 gap-2 mb-4"></div>
+        </div>
+
+        <!-- Texto cuando no hay archivos -->
+        <div id="uploadTextPublicacion" class="text-neutral-400">
+          <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          <p>Arrastra una foto o video aquí</p>
+          <button type="button" onclick="document.getElementById('file-upload').click()" 
+                  class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            Seleccionar archivo
+          </button>
+        </div>
+      </div>
 
       <!-- Descripción -->
       <div class="mb-4">
@@ -24,7 +39,7 @@
 
       <!-- Botones -->
       <div class="flex justify-end gap-2">
-        <button type="button" class="bg-red-600 text-white px-4 py-2 rounded" id="cancelarModal">Cancelar</button>
+        <button type="button" class="bg-red-600 text-white px-4 py-2 rounded" id="cancelarModalPublicacion">Cancelar</button>
         <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Publicar</button>
       </div>
     </form>

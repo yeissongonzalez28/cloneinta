@@ -1,0 +1,16 @@
+<div id="erroresFormulario" class="text-red-500 text-sm mb-2"></div>
+
+<form id="formReel" method="POST" enctype="multipart/form-data" class="p-2 space-y-2">
+  {% csrf_token %}
+  <div class="mb-4">
+    <label for="video" class="block text-sm font-medium text-gray-700">Selecciona un video</label>
+    <input type="file" id="video" name="video" accept="video/*" class="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+  </div>
+  <div class="mb-4">
+    <label for="titulo" class="block text-sm font-medium text-gray-700">Título</label>
+    <input type="text" id="titulo" name="titulo" class="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+  </div>
+  <button type="submit" class="bg-blue-600 px-4 py-2 rounded text-white w-full">
+    Subir
+  </button>
+</form>

@@ -301,4 +301,62 @@ document.addEventListener('click', function(e) {
 });
 
 
-// ----------------------------------------------------------
+// -----------------------crear_reels-----------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('modalFormulario');
+    const contenidoModal = document.getElementById('contenidoModal');
+    const abrirReelBtn = document.getElementById('abrirReel');
+
+    // Abrir modal y cargar el formulario desde la URL
+    abrirReelBtn.addEventListener('click', async () => {
+        const res = await fetch('/reels/crear/', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const html = await res.text();
+        contenidoModal.innerHTML = html;
+
+        // Botón de cerrar dinámico
+        const cerrarBtn = document.createElement('button');
+        cerrarBtn.innerHTML = '&times;';
+        cerrarBtn.className = 'absolute top-2 right-2 text-gray-500 hover:text-white text-2xl';
+        cerrarBtn.type = 'button';
+        cerrarBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        contenidoModal.appendChild(cerrarBtn);
+
+        inicializarEnvioFormulario(); // Añadir el listener de envío
+
+        modal.classList.remove('hidden');
+    });
+
+    // Cerrar modal si se hace click fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+    });
+
+    // Función para manejar el submit del formulario de subida
+    function inicializarEnvioFormulario() {
+        const form = document.getElementById('formReel');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const res = await fetch('/reels/crear/', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data.ok) {
+                    alert('✅ Reel subido correctamente');
+                    modal.classList.add('hidden');
+                    location.reload(); // Recargar los reels
+                }
+            } else {
+                const data = await res.json();
+                alert('❌ Errores: ' + JSON.stringify(data.errores));
+            }
+        });
+    }
+});

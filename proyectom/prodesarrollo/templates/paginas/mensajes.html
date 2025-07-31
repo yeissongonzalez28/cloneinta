@@ -63,7 +63,7 @@
                 <span class="hidden">Explorar</span>
             </a>
 
-            <a href="#" class="flex justify-center w-full px-3 py-3 rounded-lg hover:bg-zinc-800 mt-3">
+            <a href="{% url 'reels_feed' %}" class="flex justify-center w-full px-3 py-3 rounded-lg hover:bg-zinc-800 mt-3">
                 <img src="{% static 'myapp/img/reels.png' %}" alt="busqueda" class="w-7 h-7">
                 <span class="hidden">Reels</span>
             </a>
@@ -87,14 +87,15 @@
                     <button id="abrirModal" class="flex w-full items-center gap-2 px-4 py-3 rounded-md hover:bg-neutral-700">Publicación
                     <img src="{% static 'myapp/img/camara.png' %}" alt="publi" class="w-8 h-8 ml-[45%]">
                     </button>
-                    <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
-                    Historia
-                    <img src="{% static 'myapp/img/historia.png' %}" alt="historia" class="w-6 h-6 ml-[60%]">
-                    </a>
-                    <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
-                    Anuncio
-                    <img src="{% static 'myapp/img/anuncio.png' %}" alt="anuncio" class="w-6 h-6 ml-[58%]">
-                    </a>
+                    <button onclick="abrirModalHistoria()" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+                        Historia
+                        <img src="{% static 'myapp/img/historia.png' %}" alt="historia" class="w-6 h-6 ml-[60%]">
+                    </button>
+                    <button id="abrirReel" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+                        Subir Reel
+                        <img src="{% static 'myapp/img/reels.png' %}" alt="anuncio" class="w-6 h-6 ml-[58%]">
+                    </button>
+
                     <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
                     IA
                     <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6 ml-[80%]">
@@ -197,6 +198,9 @@
 
     </main>
 </div>
+    {% include 'paginas/crear_publi.html' %}
+    {% include 'paginas/subir_historia.html' %}
+    {% include 'paginas/visor_historias.html' %}
 
 <script>
     const form = document.getElementById('chat-form');
@@ -256,7 +260,13 @@
     }, 2000);
 </script>
 
-<script src="{% static 'myapp/js/inicio.js' %}"></script>
+        <!-- Modal (vacío al inicio) -->
+    <div id="modalFormulario" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[9999]">
+        <div id="contenidoModal" class="bg-neutral-800 rounded-lg shadow-lg w-[400px] p-4 relative">
+            <!-- Aquí se cargará el formulario -->
+        </div>
+    </div>
 
+<script src="{% static 'myapp/js/inicio.js' %}"></script>
 </body>
 </html>

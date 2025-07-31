@@ -5,6 +5,7 @@ from django.utils.crypto import get_random_string
 from django.utils import timezone
 from django.conf import settings
 from uuid import uuid4
+from django.core.exceptions import ValidationError
 import os
 
 class Usuario(AbstractUser):
@@ -196,3 +197,28 @@ class Historia(models.Model):
 
     class Meta:
         ordering = ['-fecha_creacion']
+
+
+# -----------------------------------reels---------------------------------------------------
+
+def validate_video(file):
+    max_mb = 100  # ajusta
+    if file.size > max_mb * 1024 * 1024:
+        raise ValidationError(f"El video no puede superar {max_mb} MB.")
+    # Validaciones simples por extensión/MIME si quieres
+
+class Reel(models.Model):
+    autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reels')
+    video = models.FileField(upload_to='reels/videos/', validators=[validate_video])
+    miniatura = models.ImageField(upload_to='reels/thumbs/', blank=True, null=True)
+    titulo = models.CharField(max_length=150, blank=True)
+    audio_titulo = models.CharField(max_length=150, blank=True)  # “Audio original” o nombre
+    creado = models.DateTimeField(default=timezone.now)
+    vistas = models.PositiveIntegerField(default=0)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='reels_likeados', blank=True)
+
+    class Meta:
+        ordering = ['-creado']
+
+    def __str__(self):
+        return f"{self.autor} - {self.titulo or self.pk}"

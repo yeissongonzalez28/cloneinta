@@ -205,3 +205,16 @@ class HistoriaForm(forms.ModelForm):
             if archivo.size > 100 * 1024 * 1024:  # 100MB limit
                 raise forms.ValidationError("El archivo es demasiado grande")
         return archivo
+    
+# ---------------------------reels-------------------------------------
+
+class ReelForm(forms.ModelForm):
+    class Meta:
+        model = Reel
+        fields = ['video', 'titulo', 'audio_titulo']
+        widgets = {
+            'video': forms.FileInput(attrs={'accept': 'video/*', 'class': 'w-full'}),
+            'titulo': forms.TextInput(attrs={'class': 'w-full'}),
+            'audio_titulo': forms.TextInput(attrs={'class': 'w-full'}),
+        }
+        

@@ -186,17 +186,14 @@ def obtener_mensajes(request, username):
 # ----------------------------------------
 @login_required
 def inicio(request):
-    # Limpiar historias expiradas primero
     Historia.limpiar_historias_expiradas()
     
-    # Obtener historias activas
     seguidos = Usuario.objects.filter(seguidores_de__seguidor=request.user)
     historias_activas = Historia.objects.filter(
         autor__in=[request.user] + list(seguidos),
         expiracion__gt=timezone.now()
     ).select_related('autor').order_by('autor', '-fecha_creacion')
 
-    # Agrupar historias por autor y mantener solo la más reciente
     historias_por_autor = {}
     for historia in historias_activas:
         if historia.autor.username not in historias_por_autor:
@@ -236,7 +233,7 @@ def inicio(request):
         'historia_form': HistoriaForm(),
         'usuarios_sugeridos': usuarios_con_conteo_mutuo,
         'publicaciones': publicaciones,
-        'historias_activas': historias_por_autor.values()  # Añadir historias al contexto
+        'historias_activas': historias_por_autor.values()
     }
     return render(request, 'paginas/inicio.html', contexto)
 
@@ -267,13 +264,11 @@ def seguir_usuario(request, nombre_usuario):
     return redirect(request.META.get('HTTP_REFERER', 'inicio'))
 
 def obtener_usuarios_sugeridos(usuario_actual, limite=20):
-    # 1. Usernames que el usuario actual sigue
     siguiendo_usernames = list(
         Seguimiento.objects.filter(seguidor=usuario_actual)
         .values_list('seguido__username', flat=True)
     )
 
-    # 2. Usuarios que son seguidos por los que yo sigo (amigos de amigos)
     sugerencias_usernames = Seguimiento.objects.filter(
         seguidor__username__in=siguiendo_usernames
     ).exclude(
@@ -282,7 +277,6 @@ def obtener_usuarios_sugeridos(usuario_actual, limite=20):
         num_seguidores=Count('seguido__username')
     ).order_by('-num_seguidores').values_list('seguido__username', flat=True)
 
-    # 3. Obtener objetos de Usuario
     sugeridos = Usuario.objects.filter(username__in=sugerencias_usernames)[:limite]
 
     return sugeridos
@@ -294,7 +288,6 @@ def ver_todas_sugerencias(request):
     todas_sugerencias = obtener_usuarios_sugeridos(request.user, limite=20)
     usuarios_con_conteo_mutuo = []
 
-    # IDs de usuarios que el usuario actual sigue
     siguiendo_ids = request.user.siguiendo_a.values_list('seguido_id', flat=True)
 
     for sugerido in todas_sugerencias:
@@ -582,3 +575,66 @@ def obtener_todas_historias(request):
 @login_required
 def reels(request):
     return render(request,'paginas/reels.html')
+
+# ---------------------------------reels------------------------------------
+
+@login_required
+def crear_reel(request):
+    if request.method == 'POST':
+        form = ReelForm(request.POST, request.FILES)
+        if form.is_valid():
+            reel = form.save(commit=False)
+            reel.autor = request.user
+            reel.save()
+            return redirect('reels_feed')
+    else:
+        form = ReelForm()
+    return render(request, 'CRUD/crear_reels.html', {'form': form})
+
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_POST
+
+def reels_feed(request):
+    page = int(request.GET.get('page', 1))
+    qs = Reel.objects.select_related('autor').prefetch_related('likes')
+    paginator = Paginator(qs, 5)  # 5 reels por “página”
+    page_obj = paginator.get_page(page)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        data = []
+        for r in page_obj:
+            data.append({
+                'id': r.pk,
+                'video_url': r.video.url,
+                'miniatura_url': r.miniatura.url if r.miniatura else '',
+                'autor': str(r.autor),
+                'autor_username': r.autor.username,
+                'autor_imagen': r.autor.imagen_perfil.url if r.autor.imagen_perfil else '/static/img/perfil_default.png',  # 🔹 AQUI
+                'titulo': r.titulo,
+                'audio': r.audio_titulo or 'Audio original',
+                'likes': r.likes.count(),
+                'vistas': r.vistas,
+                'ya_likeado': request.user in r.likes.all(),
+            })
+        return JsonResponse({'items': data, 'has_next': page_obj.has_next()})
+    return render(request, 'paginas/reels.html', {'page_obj': page_obj})
+
+@require_POST
+@login_required
+def toggle_like_reel(request, pk):
+    reel = get_object_or_404(Reel, pk=pk)
+    if request.user in reel.likes.all():
+        reel.likes.remove(request.user)
+        likeado = False
+    else:
+        reel.likes.add(request.user)
+        likeado = True
+    return JsonResponse({'ok': True, 'likeado': likeado, 'likes': reel.likes.count()})
+
+@require_POST
+@login_required
+def sumar_vista_reel(request, pk):
+    reel = get_object_or_404(Reel, pk=pk)
+    reel.vistas = models.F('vistas') + 1
+    reel.save(update_fields=['vistas'])
+    reel.refresh_from_db(fields=['vistas'])
+    return JsonResponse({'ok': True, 'vistas': reel.vistas})

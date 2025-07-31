@@ -13,7 +13,7 @@
             {% csrf_token %}
             <div class="space-y-4">
                 <div class="border-2 border-dashed border-neutral-700 rounded-lg p-8 text-center" 
-                     id="dropZoneHistoria">
+                    id="dropZoneHistoria">
                     {{ historia_form.archivo }}
                     <div id="previewHistoria" class="hidden">
                         <img id="previewImage" class="max-h-[400px] mx-auto mb-4 hidden" src="" alt="">
@@ -24,7 +24,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                         </svg>
                         <p>Arrastra una foto o video aquí</p>
-                        <button type="button" onclick="document.getElementById('historiaInput').click()" 
+                        <button type="button" onclick="document.getElementById('historiaInput').click()"
                                 class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                             Seleccionar archivo
                         </button>

@@ -96,10 +96,12 @@
                         Historia
                         <img src="{% static 'myapp/img/historia.png' %}" alt="historia" class="w-6 h-6 ml-[60%]">
                     </button>
-                    <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
-                    Anuncio
-                    <img src="{% static 'myapp/img/anuncio.png' %}" alt="anuncio" class="w-6 h-6 ml-[58%]">
-                    </a>
+
+                    <button id="abrirReel" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
+                        Subir Reel
+                        <img src="{% static 'myapp/img/reels.png' %}" alt="anuncio" class="w-6 h-6 ml-[58%]">
+                    </button>
+
                     <a href="#" class="flex items-center gap-2 px-4 py-4 rounded-md hover:bg-neutral-700">
                     IA
                     <img src="{% static 'myapp/img/ai.png' %}" alt="ai" class="w-6 h-6 ml-[80%]">
@@ -149,17 +151,25 @@
     </div>
         </nav>
 
-
         <main class="flex-1 p-8">
+            <div id="reels-container" class="h-screen overflow-y-scroll snap-y snap-mandatory bg-black text-white w-[80%] ml-[240px]"></div>
 
         </main>
 
     </div>
+        <!-- Modal -->
+    <div id="modalFormulario" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden">
+        <div id="contenidoModal" class="bg-neutral-800 rounded-lg shadow-lg w-[400px] p-4 relative">
+            <!-- Aquí se carga el formulario -->
+        </div>
+    </div>
+
     {% include 'paginas/crear_publi.html' %}
     {% include 'paginas/subir_historia.html' %}
     {% include 'paginas/visor_historias.html' %}
-    
+
     <script src="{% static 'myapp/js/inicio.js' %}" ></script>
+    <script src="{% static 'myapp/js/reels.js' %}" ></script>
 </body>
 </html>
 
