@@ -170,7 +170,7 @@ class EditarPerfilForm(forms.ModelForm):
                 raise forms.ValidationError("Ya existe un usuario con este email.")
         return email
 
-# -----------------------------------------------
+# ------------------------publicaciones-----------------------------------
 class PublicacionForm(forms.ModelForm):
     class Meta:
         model = Publicacion
@@ -182,6 +182,20 @@ class PublicacionForm(forms.ModelForm):
                 'placeholder': 'Escribe una descripción...'
             }),
         }
+
+
+class ComentarioForm(forms.ModelForm):
+    class Meta:
+        model = Comentario
+        fields = ['texto']
+        widgets = {
+            'texto': forms.TextInput(attrs={
+                'placeholder': 'Agrega un comentario...',
+                'class': 'w-full p-2 text-sm bg-neutral-800 text-white rounded'
+            }),
+        }
+
+
 
 class HistoriaForm(forms.ModelForm):
     archivo = forms.FileField(

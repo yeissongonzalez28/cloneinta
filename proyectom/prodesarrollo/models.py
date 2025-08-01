@@ -154,6 +154,9 @@ class Comentario(models.Model):
     texto = models.TextField(max_length=500)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['fecha_creacion']
+    
     def __str__(self):
         return f"Comentario de {self.autor.username}"
 

@@ -158,8 +158,16 @@
                             <img src="{% static 'myapp/img/perfil_default.jpg' %}" alt="Sin imagen" class="w-10 h-10 object-cover rounded-full">
                         {% endif %}
                         <div>
-                            <div class="font-semibold text-white">{{ seguido.username }}</div>
-                            <div class="text-zinc-400 text-sm">Enviar mensaje</div>
+                            <div class="font-semibold text-white">{{ seguido.nombre_completo }}</div>
+                            <div class="text-zinc-400 text-sm">{% load customtime %}
+                            {% with mensaje=ultimos_mensajes|dict_key:seguido.username %}
+                                    {% if mensaje %}
+                                        {{ mensaje }}
+                                    {% else %}
+                                        Enviar mensaje
+                                    {% endif %}
+                            {% endwith %}
+                            </div>
                         </div>
                     </a>
                 </li>
@@ -171,7 +179,17 @@
 
         <div class="flex-1 p-4">
             {% if receptor %}
-            <h2 class="text-lg font-bold">Chat con {{ receptor.username }}</h2>
+            <div class="flex items-center gap-4 mb-4">
+                {% if receptor.imagen_perfil %}
+                    <img src="{{ receptor.imagen_perfil.url }}" alt="Foto de perfil" class="w-12 h-12 object-cover rounded-full">
+                {% else %}
+                    <img src="{% static 'myapp/img/perfil_default.jpg' %}" alt="Sin imagen" class="w-12 h-12 object-cover rounded-full">
+                {% endif %}
+                <div class="flex flex-col">
+                    <h2 class="text-lg font-bold">{{ receptor.nombre_completo }}</h2>
+                    <p class="text-[13px] text-neutral-400">{{ receptor.username }}</p>
+                </div>
+            </div>
 
             <div id="chat-box" class="h-[calc(100vh-200px)] overflow-y-auto px-4 py-2 space-y-4">
                 {% for mensaje in mensajes %}
@@ -187,7 +205,7 @@
                 {% csrf_token %}
                 <input type="hidden" id="receptor" value="{{ receptor.username }}">
                 <input type="text" id="mensaje"
-                    class="flex-1 bg-zinc-800 text-white rounded-full px-4 py-2 focus:outline-none" 
+                    class="flex-1 bg-zinc-800 text-white rounded-full px-4 py-2 focus:outline-none"
                     placeholder="Escribe un mensaje...">
                 <button type="submit" class="text-blue-500 font-semibold px-4">Enviar</button>
             </form>

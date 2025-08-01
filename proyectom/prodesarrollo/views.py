@@ -117,29 +117,36 @@ def reenviar_codigo(request):
 from django.views.decorators.csrf import csrf_exempt
 
 @login_required
-def mensajes(request):
-    usuario_actual = request.user  # Asumiendo que usas `Usuario` como modelo de usuario
+def mensajes(request, username=None):
+    usuario_actual = request.user
     seguidos = Usuario.objects.filter(
         seguidores_de__seguidor=usuario_actual
     ).distinct()
 
+    receptor = None
+    mensajes = []
+    ultimos_mensajes = {}
+
+    for seguido in seguidos:
+        ultimo = Message.objects.filter(
+            enviar__in=[usuario_actual, seguido],
+            recibir__in=[usuario_actual, seguido]
+        ).order_by('-fecha_envio').first()
+
+        ultimos_mensajes[seguido.username] = ultimo.contenido if ultimo else None
+
+    if username:
+        receptor = get_object_or_404(Usuario, username=username)
+        mensajes = Message.objects.filter(
+            enviar__in=[usuario_actual, receptor],
+            recibir__in=[usuario_actual, receptor]
+        ).order_by('fecha_envio')
+
     return render(request, 'paginas/mensajes.html', {
         'seguidos': seguidos,
-    })
-
-
-@login_required
-def chat(request, username):
-    receptor = get_object_or_404(Usuario, username=username)
-
-    mensajes = Message.objects.filter(
-        enviar__in=[request.user, receptor],
-        recibir__in=[request.user, receptor]
-    ).order_by('fecha_envio')
-
-    return render(request, 'paginas/mensajes.html', {
         'receptor': receptor,
-        'mensajes': mensajes
+        'mensajes': mensajes,
+        'ultimos_mensajes': ultimos_mensajes
     })
 
 @csrf_exempt
@@ -367,7 +374,7 @@ def editar_perfil(request):
 
     return render(request, 'paginas/editar_perfil.html', {'form': form})
 
-# ------------------------------------------------------
+# ----------------------------publicaciones---------------------------------------
 @login_required
 def crear_publicacion(request):
     if request.method == 'POST':
@@ -405,6 +412,39 @@ def crear_publicacion(request):
     return render(request, 'paginas/inicio.html', {'form': form, 'publicaciones': publicaciones})
 
 
+@login_required
+def like(request, publicacion_id):
+    if request.method == 'POST':
+        publicacion = get_object_or_404(Publicacion, id=publicacion_id)
+        usuario = request.user
+        if usuario in publicacion.me_gusta.all():
+            publicacion.me_gusta.remove(usuario)
+            liked = False
+        else:
+            publicacion.me_gusta.add(usuario)
+            liked = True
+        return JsonResponse({
+            'liked': liked,
+            'total_likes': publicacion.total_me_gusta()
+        })
+    return JsonResponse({'error': 'Método no permitido'}, status=400)
+
+@login_required
+def comentar(request, publicacion_id):
+    publicacion = get_object_or_404(Publicacion, id=publicacion_id)
+    if request.method == 'POST':
+        texto = request.POST.get('texto', '').strip()  # ← busca 'texto' en el form
+        if texto:
+            Comentario.objects.create(
+                publicacion=publicacion,
+                autor=request.user,
+                texto=texto
+            )
+    return redirect('inicio')
+
+
+# ------------------------------buscar usuarios----------------------------------------
+
 def buscar_usuarios(request):
     query = request.GET.get('q', '')
     usuarios = []
@@ -427,6 +467,8 @@ def buscar_usuarios(request):
     
     return JsonResponse({'usuarios': []})
 
+
+# -------------------------------historias-------------------------------------------
 @login_required
 @require_http_methods(["POST"])
 def crear_historia(request):

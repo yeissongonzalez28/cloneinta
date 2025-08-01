@@ -237,12 +237,43 @@
                         {% endfor %}
                     </div>
 
+                    <div class="mt-2 items-center gap-2">
+                        <form class="like-form" data-id="{{ publicacion.id }}">
+                        {% csrf_token %}
+                            <button type="submit" class="like-btn transition-transform duration-150">
+                                {% if request.user in publicacion.me_gusta.all %}
+                                    <span class="text-2xl text-red-500">❤️</span>
+                                {% else %}
+                                    <span class="text-2xl text-white">🤍</span>
+                                {% endif %}
+                            </button>
+                        </form>
+                        <p class="text-sm text-gray-400 mt-1" id="likes-{{ publicacion.id }}">{{ publicacion.total_me_gusta }} me gusta</p>
+                    </div>
 
                     <div class="text-sm text-gray-300">
                         <p class="mt-2">{{ publicacion.descripcion }}</p>
                         <p class="text-xs text-gray-500 mt-1">{{ publicacion.fecha_creacion|date:"d M Y H:i" }}</p>
                     </div>
+
+                    <div class="space-y-2">
+                        {% for comentario in publicacion.comentarios.all %}
+                            <div class="text-sm text-white">
+                                <strong>{{ comentario.autor.username }}</strong>: {{ comentario.texto }}
+                            </div>
+                        {% empty %}
+                            <p class="text-gray-500 text-sm">Sé el primero en comentar</p>
                         {% endfor %}
+                    </div>
+
+                    <form method="post" action="{% url 'comentar' publicacion.id %}" class="mt-2 ">
+                        {% csrf_token %}
+                        <div class="flex items-center gap-2">
+                            <input type="text" name="texto" placeholder="Agrega un comentario..."
+                                class="w-[88%] p-2 text-sm bg-neutral-800 text-white rounded focus:outline-none focus:ring focus:ring-blue-500 rounded-[10px]">
+                        </div>
+                    </form>
+                    {% endfor %}
             </div>
 
         </main>
@@ -286,6 +317,39 @@
             <!-- Aquí se cargará el formulario -->
         </div>
     </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.like-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const publicacionId = this.dataset.id;
+      const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      fetch(`/like/${publicacionId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.liked !== undefined) {
+          const likeBtn = this.querySelector('.like-btn span');
+          const likesText = document.getElementById(`likes-${publicacionId}`);
+
+          likeBtn.textContent = data.liked ? '❤️' : '🤍';
+          likeBtn.className = data.liked ? 'text-2xl text-red-500' : 'text-2xl text-white';
+          likesText.textContent = `${data.total_likes} me gusta`;
+        }
+      })
+      .catch(err => console.error('Error al enviar el like', err));
+    });
+  });
+});
+</script>
+
 
     <script src="{% static 'myapp/js/inicio.js' %}" ></script>
 </body>
